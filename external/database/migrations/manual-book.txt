@@ -1,0 +1,5 @@
+*Database Migration Script
+-> migrate -database postgres://postgres:postgres@localhost:5432/db_social_service -path external/database/migrations up/down
+
+*Database Create Migration
+-> migrate create -ext sql -dir external/database/migrations migration-name
