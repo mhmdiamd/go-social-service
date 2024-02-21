@@ -9,7 +9,7 @@ import (
 
 type Repository interface {
   GetAuthByEmail(ctx context.Context, email string) (model AuthEntity, err error)
-  CreateUser(ctx context.Context, mode AuthEntity) (err error) 
+  CreateAuth(ctx context.Context, model AuthEntity) (err error) 
 }
 
 type service struct {
@@ -32,7 +32,7 @@ func (s service) register(ctx context.Context, req RegisterRequestPayload) (err 
   }
 
   // Password encryption 
-  if err = authEntity.EncryptedPassword(int(config.Cfg.App.Encryption.Salt)); err != nil {
+  if err = authEntity.EncryptPassword(int(config.Cfg.App.Encryption.Salt)); err != nil {
     return
   }
 
@@ -47,12 +47,31 @@ func (s service) register(ctx context.Context, req RegisterRequestPayload) (err 
   }
 
   // Execute Serivce
-  return s.repo.CreateUser(ctx, model)
+  return s.repo.CreateAuth(ctx, authEntity)
 }
 
-// func (s service) login(ctx context.Context, req LoginRequestPayload) (model AuthEntity, err error) {\
-//
-//
-//   return
-// }
+func (s service) login(ctx context.Context, req LoginRequestPayload) (token string, err error) {
+  authEntity := NewAuthEntityFromLogin(req)
+
+  // Validation
+  if err = authEntity.Validate(); err != nil {
+    return 
+  }
+
+  // Check is account exists
+  model, err := s.repo.GetAuthByEmail(ctx, req.Email)
+  if err != nil {
+    return
+  }
+
+  // Validation Password
+  if err = authEntity.VerifyPasswordFromPlain(model.Password); err != nil {
+    err = response.ErrPasswordNotMatch
+    return
+  }
+
+  token, err = model.GenerateToken(config.Cfg.App.Encryption.JWTSecret)
+
+  return 
+}
 

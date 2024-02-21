@@ -1,11 +1,13 @@
 package auth
 
 import (
+	"database/sql"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/mhmdiamd/go-social-service/infra/response"
+	"github.com/mhmdiamd/go-social-service/utility"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,11 +21,12 @@ const (
 type AuthEntity struct {
   Id int `db:"id"`
   PublicId uuid.UUID `db:"public_id"`
-  Nik string `db:"nik"`
-  Name string `db:"name"`
+  Name sql.NullString `db:"name"`
   Email string `db:"email"`
   Password string `db:"password"`
-  Gender Gender `db:"gender"`
+  Gender sql.NullString `db:"gender"`
+  No_tlp sql.NullString `db:"no_tlp"`
+  Address sql.NullString `db:"address"`
 
   CreatedAt time.Time `db:"created_at"`
   UpdatedAt time.Time `db:"updated_at"`
@@ -39,7 +42,7 @@ func NewAuthEntityFromRegister(req RegisterRequestPayload) AuthEntity {
   }
 }
 
-func NewAuthEntityFromLogin(req RegisterRequestPayload) AuthEntity {
+func NewAuthEntityFromLogin(req LoginRequestPayload) AuthEntity {
   return AuthEntity{
     Email: req.Email,
     Password: req.Password,
@@ -89,7 +92,7 @@ func (a AuthEntity) IsExists() bool {
   return a.Id != 0
 }
 
-func (a *AuthEntity) EncryptedPassword(salt int) (err error) {
+func (a *AuthEntity) EncryptPassword(salt int) (err error) {
   encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(a.Password), salt)
   if err != nil {
     return err
@@ -97,6 +100,14 @@ func (a *AuthEntity) EncryptedPassword(salt int) (err error) {
 
   a.Password = string(encryptedPassword)
   return
+}
+
+func (a AuthEntity) VerifyPasswordFromPlain(encrypted string) (err error) {
+  return bcrypt.CompareHashAndPassword([]byte(encrypted), []byte(a.Password))
+}
+
+func (a AuthEntity) GenerateToken(secret string) (tokenString string, err error) {
+  return utility.GenerateToken(a.PublicId.String(), secret)
 }
 
 

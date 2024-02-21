@@ -17,7 +17,7 @@ func TestGenerateToken(t *testing.T) {
     }
     authEntity := auth.NewAuthEntityFromRegister(model)
 
-    err := authEntity.EncryptedPassword(int(config.Cfg.App.Encryption.Salt))
+    err := authEntity.EncryptPassword(int(config.Cfg.App.Encryption.Salt))
 
     require.Nil(t, err)
     fmt.Println(authEntity.Password)

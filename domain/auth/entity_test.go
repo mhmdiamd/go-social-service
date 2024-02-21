@@ -14,7 +14,7 @@ func TestValidateEmail(t *testing.T) {
       Password: "123456",
     }
 
-    authData := NewAuthEntity(request)
+    authData := NewAuthEntityFromRegister(request)
     err := authData.Validate()
 
     require.Nil(t, err)
@@ -24,7 +24,7 @@ func TestValidateEmail(t *testing.T) {
     request := RegisterRequestPayload{
       Password: "123456",
     }
-    authData := NewAuthEntity(request)
+    authData := NewAuthEntityFromRegister(request)
 
     err := authData.Validate()
 
@@ -37,7 +37,7 @@ func TestValidateEmail(t *testing.T) {
       Email : "amgmail.com",
       Password: "123456",
     }
-    authData := NewAuthEntity(request)
+    authData := NewAuthEntityFromRegister(request)
 
     err := authData.Validate()
 
@@ -52,7 +52,7 @@ func TestValidatePassword(t *testing.T) {
       Email : "am@gmail.com",
       Password: "123456",
     }
-    authData := NewAuthEntity(request)
+    authData := NewAuthEntityFromRegister(request)
 
     err := authData.Validate()
     require.Nil(t, err)
@@ -62,7 +62,7 @@ func TestValidatePassword(t *testing.T) {
     request := RegisterRequestPayload{
       Email : "am@gmail.com",
     }
-    authData := NewAuthEntity(request)
+    authData := NewAuthEntityFromRegister(request)
 
     err := authData.Validate()
 
@@ -75,7 +75,7 @@ func TestValidatePassword(t *testing.T) {
       Email : "am@gmail.com",
       Password: "12345",
     }
-    authData := NewAuthEntity(request)
+    authData := NewAuthEntityFromRegister(request)
 
     err := authData.Validate()
 

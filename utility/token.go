@@ -12,7 +12,7 @@ func GenerateToken(public_id, secret string) (tokenString string, err error) {
     "id" : public_id,
   }
 
-  tokenClaim := jwt.NewWithClaims(jwt.SigningMethodES256, jwtClaim)
+  tokenClaim := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtClaim)
 
   tokenString, err = tokenClaim.SignedString([]byte(secret))
   if err != nil {
