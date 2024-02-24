@@ -27,41 +27,14 @@ func init() {
   svc = newService(repo)
 }
 
-func TestCreateAuth_Success(t *testing.T) {
-  t.Run("success", func (t *testing.T) {
-    req := RegisterRequestPayload{
-      Email : fmt.Sprintf("%vam@gmail.com", uuid.NewString()),
-      Password : "password",
-    }
-
-    err := svc.register(context.Background(), req)
-    require.Nil(t, err)
-  })
-}
-
-func TestCreateAuth_Fail(t *testing.T) {
-  t.Run("error email is already use", func(t *testing.T) {
-    email := fmt.Sprintf("%vam@gmail.com", uuid.NewString())
-    req := RegisterRequestPayload{
-      Email : email,
-      Password : "password",
-    }
-
-    err := svc.register(context.Background(), req)
-    require.Nil(t, err)
-
-    err = svc.register(context.Background(), req)
-    require.Equal(t, response.ErrEmailAlreadyUsed, err)
-  })
-}
-
-func TestLogin(t *testing.T) {
+func TestAuth(t *testing.T) {
   email := fmt.Sprintf("%vam@gmail.com", uuid.NewString())
+  password := "password"
 
   t.Run("success", func(t *testing.T) {
     req := RegisterRequestPayload{
       Email : email,
-      Password : "password",
+      Password : password,
     }
 
     err := svc.register(context.Background(), req)
@@ -69,7 +42,7 @@ func TestLogin(t *testing.T) {
 
     reqLogin := LoginRequestPayload{
       Email: email,
-      Password : "password",
+      Password : password,
     }
 
     token, err := svc.login(context.Background(), reqLogin)
@@ -89,4 +62,30 @@ func TestLogin(t *testing.T) {
   })
 }
 
+func TestCreateAuth_Fail(t *testing.T) {
+  t.Run("error email is already use", func(t *testing.T) {
+    email := fmt.Sprintf("%vam@gmail.com", uuid.NewString())
+    req := RegisterRequestPayload{
+      Email : email,
+      Password : "password",
+    }
 
+    err := svc.register(context.Background(), req)
+    require.Nil(t, err)
+
+    err = svc.register(context.Background(), req)
+    require.Equal(t, response.ErrEmailAlreadyUsed, err)
+  })
+}
+
+func Test_SendOTP(t *testing.T) {
+  t.Run("success", func(t *testing.T) {
+    req := SendOtpRequestPayload{
+      Email: "milham0141@gmail.com",
+      Password : "password",
+    }
+
+    err := svc.sendOtp(context.Background(), req)
+    require.Nil(t, err)
+  })
+}

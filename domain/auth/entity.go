@@ -110,4 +110,3 @@ func (a AuthEntity) GenerateToken(secret string) (tokenString string, err error)
   return utility.GenerateToken(a.PublicId.String(), secret)
 }
 
-

@@ -8,6 +8,7 @@ import (
 var (
   ErrNotFound = errors.New("not found")
   ErrUnauthorized = errors.New("unauthorized")
+  ErrBadRequest = errors.New("bad request")
 )
 
 var (
@@ -41,7 +42,7 @@ func NewError(message, code string, httpCode int) Error {
 var (
   // Global error
   ErrorGeneral = NewError("internal server error", "99999", http.StatusInternalServerError)
-  ErrorBadRequest = NewError("bad request", "40000", http.StatusBadRequest)
+  ErrorBadRequest = NewError(ErrBadRequest.Error(), "40000", http.StatusBadRequest)
   ErrorNotFound = NewError(ErrNotFound.Error(), "40400", http.StatusNotFound)
   ErrorUnauthorized = NewError(ErrUnauthorized.Error(), "40900", http.StatusBadRequest)
 )

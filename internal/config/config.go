@@ -15,6 +15,17 @@ type AppConfig struct {
   Name string `yaml:"name"`
   Port string `yaml:"port"`
   Encryption EncryptionConfig `yaml:"encryption"`
+  External ExternalConfig `yaml:"external"`
+}
+
+type ExternalConfig struct {
+  Google GoogleConfig `yaml:"google"`
+}
+
+type GoogleConfig struct {
+  Smtp_password string `yaml:"smtp_password"`
+  Smtp_sender_email string `yaml:"smtp_sender_email"`
+  Smtp_sender_name string `yaml:"smtp_sender_name"`
 }
 
 type EncryptionConfig struct {

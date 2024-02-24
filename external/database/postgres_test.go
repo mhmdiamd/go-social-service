@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-  filename := "../../cmd/api/config.yml"
+  filename := "../../cmd/api/config.yaml"
   err := config.LoadConfig(filename)
 
   if err != nil {
