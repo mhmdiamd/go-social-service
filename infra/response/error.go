@@ -13,12 +13,27 @@ var (
 
 var (
   // Auth Error
+  ErrPublicIdUserOtpRequired = errors.New("otp id is required")
+
   ErrEmailRequired = errors.New("email is required")
   ErrEmailInvalid = errors.New("email is invalid")
   ErrEmailAlreadyUsed = errors.New("email already used")
+
+  ErrNameRequired = errors.New("name is required")
+  ErrNameInvalid = errors.New("name is invalid")
+
   ErrPasswordInvalid = errors.New("password is invalid, character min 6")
-  ErrPasswordNotMatch = errors.New("password is not match")
   ErrPasswordRequired = errors.New("password is required")
+  ErrPasswordNotMatch = errors.New("password is not match")
+
+  ErrPasswordConfirmationInvalid = errors.New("password confirmation is invalid, character min 6")
+  ErrPasswordConfirmationRequired = errors.New("password confirmation is required")
+  ErrPasswordConfirmationNotMatch = errors.New("password confirmation is not match")
+
+  ErrOtpRequired = errors.New("otp is required")
+  ErrOtpInvalid = errors.New("otp is invalid")
+  ErrOtpExpired = errors.New("otp is expired")
+  ErrToMuchSendEmail = errors.New("to much send email (more than 3x), your account get blocked")
 )
 
 type Error struct {
@@ -53,9 +68,23 @@ var (
   ErrorEmailInvalid = NewError(ErrEmailInvalid.Error(), "40002", http.StatusBadRequest)
   ErrorEmailAlreadyUsed = NewError(ErrEmailAlreadyUsed.Error(), "40901", http.StatusConflict)
 
-  ErrorPasswordRequired = NewError(ErrPasswordInvalid.Error(), "40003", http.StatusBadRequest)
-  ErrorPasswordInvalid = NewError(ErrPasswordInvalid.Error(), "40004", http.StatusBadRequest)
-  ErrorPasswordNotMatch = NewError(ErrPasswordNotMatch.Error(), "40005", http.StatusUnauthorized)
+  ErrorNameRequired = NewError(ErrNameRequired.Error(), "40003", http.StatusBadRequest)
+  ErrorNameInvalid = NewError(ErrNameInvalid.Error(), "40004", http.StatusBadRequest)
+
+  ErrorPasswordRequired = NewError(ErrPasswordInvalid.Error(), "40005", http.StatusBadRequest)
+  ErrorPasswordInvalid = NewError(ErrPasswordInvalid.Error(), "40006", http.StatusBadRequest)
+  ErrorPasswordNotMatch = NewError(ErrPasswordNotMatch.Error(), "40007", http.StatusUnauthorized)
+
+  ErrorPasswordConfirmationRequired = NewError(ErrPasswordConfirmationRequired.Error(), "40008", http.StatusBadRequest)
+  ErrorPasswordConfirmationInvalid = NewError(ErrPasswordConfirmationInvalid.Error(), "40009", http.StatusBadRequest)
+  ErrorPasswordConfirmationNotMatch = NewError(ErrPasswordConfirmationNotMatch.Error(), "40010", http.StatusUnauthorized)
+
+  ErrorPublicIdUserOtpRequired = NewError(ErrPublicIdUserOtpRequired.Error(), "40011", http.StatusUnauthorized)
+
+  ErrorOtpRequired = NewError(ErrOtpRequired.Error(), "40012", http.StatusBadRequest)
+  ErrorOtpInvalid = NewError(ErrOtpInvalid.Error(), "400013", http.StatusBadRequest)
+  ErrorOtpExpired = NewError(ErrOtpExpired.Error(), "40901", http.StatusUnauthorized)
+  ErrorToMuchSendEmail = NewError(ErrToMuchSendEmail.Error(), "40014", http.StatusBadRequest)
 )
 
 var ErrorMapping = map[string]Error{
@@ -71,6 +100,11 @@ var ErrorMapping = map[string]Error{
   ErrorPasswordInvalid.Error() : ErrorPasswordRequired,
   ErrorPasswordInvalid.Error() : ErrorPasswordInvalid, 
   ErrorPasswordNotMatch.Error() : ErrorPasswordNotMatch,
+
+  ErrorOtpRequired.Error() : ErrorOtpRequired,
+  ErrorOtpInvalid.Error() : ErrorOtpInvalid,
+  ErrorOtpExpired.Error() : ErrorOtpExpired,
+  ErrorToMuchSendEmail.Error() : ErrorToMuchSendEmail,
 }
 
 

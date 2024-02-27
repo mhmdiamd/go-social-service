@@ -3,8 +3,8 @@ package auth
 import (
 	"context"
 	"database/sql"
-	"log"
 
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/mhmdiamd/go-social-service/infra/response"
 )
@@ -23,9 +23,9 @@ func (r repository) CreateAuth(ctx context.Context, model AuthEntity) (err error
 
   query := `
     INSERT INTO auth (
-      public_id, email, password, created_at, updated_at
+      public_id, name, email, password, user_otp_public_id, created_at, updated_at
     ) VALUES (
-      :public_id, :email, :password, :created_at, :updated_at
+      :public_id, :name, :email, :password, :user_otp_public_id, :created_at, :updated_at
     )
   `
 
@@ -65,9 +65,9 @@ func (r repository) CreateOTP(ctx context.Context, model OtpEntity) (err error) 
 
   query := `
     INSERT INTO user_otp (
-      otp, email, password, is_active, expired_at, updated_at, created_at
+     public_id, otp, email, is_active, expired_at, updated_at, created_at
     ) VALUES (
-      :otp, :email, :password, :is_active, :expired_at, :updated_at, :created_at
+      :public_id, :otp, :email, :is_active, :expired_at, :updated_at, :created_at
     )
   `
 
@@ -87,15 +87,15 @@ func (r repository) CreateOTP(ctx context.Context, model OtpEntity) (err error) 
   return 
 }
 
-func (r repository)GetOtpByEmail(ctx context.Context, email string) (models []OtpEntity, err error) {
+func (r repository) GetOtpByEmail(ctx context.Context, email string) (models []OtpEntity, err error) {
 
-  log.Println(email)
+  query := `
+    SELECT 
+      id, public_id, otp, email, is_active, expired_at, created_at, updated_at
+    FROM user_otp WHERE email=$1
+  `
 
-  query := `SELECT * FROM user_otp WHERE email=$1`
-
-  var otpEntities []OtpEntity
-
-  err = r.db.SelectContext(ctx, &otpEntities, query, email)
+  err = r.db.SelectContext(ctx, &models, query, email)
 
   if err != nil {
     if err == sql.ErrNoRows {
@@ -105,5 +105,85 @@ func (r repository)GetOtpByEmail(ctx context.Context, email string) (models []Ot
   }
 
   return 
+}
+
+func (r repository) GetDetailOtp(ctx context.Context, public_id_user_otp uuid.UUID) (model OtpEntity, err error) {
+
+  query := `
+    SELECT 
+      id, public_id, otp, email, is_active, expired_at, created_at, updated_at
+    FROM user_otp
+    WHERE public_id=$1
+  `
+
+  err = r.db.GetContext(ctx, &model, query, public_id_user_otp)
+
+  if err != nil {
+    if err == sql.ErrNoRows {
+      err = response.ErrNotFound
+      return
+    }
+
+    return
+  }
+
+  return
+}
+
+func (r repository) GetDetailOtpByEmailAndOtp(ctx context.Context, req VerifyOtpRequestPayload) (model OtpEntity, err error) {
+
+  query := `
+    SELECT 
+      id, public_id, otp, email, is_active, expired_at, created_at, updated_at
+    FROM user_otp
+    WHERE otp=$1 AND email=$2
+  `
+
+  err = r.db.GetContext(ctx, &model, query, req.Otp, req.Email)
+
+  if err != nil {
+    if err == sql.ErrNoRows {
+      err = response.ErrNotFound
+      return
+    }
+
+    return
+  }
+
+  return
+}
+
+func (r repository) DeleteAuthByEmail(ctx context.Context, email string) (err error) {
+  
+  query := `
+    DELETE FROM auth WHERE email=$1
+  `
+
+  _, err = r.db.ExecContext(ctx, query, email)
+
+  if err != nil {
+    return
+  }
+
+
+  return 
+
+}
+
+func (r repository) UnactiveOtp(ctx context.Context, email string) (err error) {
+  
+  query := `
+    UPDATE user_otp SET is_active=0 WHERE email=$1
+  `
+
+  _, err = r.db.ExecContext(ctx, query, email)
+
+  if err != nil {
+    return
+  }
+
+
+  return 
+
 }
 

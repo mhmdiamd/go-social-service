@@ -21,12 +21,15 @@ const (
 type AuthEntity struct {
   Id int `db:"id"`
   PublicId uuid.UUID `db:"public_id"`
-  Name sql.NullString `db:"name"`
+  Name string `db:"name"`
   Email string `db:"email"`
   Password string `db:"password"`
+  PasswordConfirmation string `db:"-"`
   Gender sql.NullString `db:"gender"`
   No_tlp sql.NullString `db:"no_tlp"`
   Address sql.NullString `db:"address"`
+
+  PublicIdUserOtp uuid.UUID `db:"user_otp_public_id"`
 
   CreatedAt time.Time `db:"created_at"`
   UpdatedAt time.Time `db:"updated_at"`
@@ -35,8 +38,10 @@ type AuthEntity struct {
 func NewAuthEntityFromRegister(req RegisterRequestPayload) AuthEntity {
   return AuthEntity{
     PublicId: uuid.New(),
-    Email: req.Email,
+    Name: req.Name,
     Password: req.Password,
+    PasswordConfirmation: req.PasswordConfirmation,
+    PublicIdUserOtp: req.PublicIdUserOtp,
     CreatedAt: time.Now(),
     UpdatedAt: time.Now(),
   }
@@ -49,40 +54,97 @@ func NewAuthEntityFromLogin(req LoginRequestPayload) AuthEntity {
   }
 }
 
-func (a *AuthEntity) Validate() (err error) {
+func (r AuthEntity) Validate() (err error) {
 
-  if err = a.ValidateEmail(); err != nil {
-    return 
+  if err = r.ValidateName(); err != nil {
+    return
   }
 
-  if err = a.ValidatePassword(); err != nil {
+  if err = r.ValidatePassword(); err != nil {
+    return
+  }
+
+  if err = r.ValidatePasswordConfirmation(); err != nil {
+    return
+  }
+
+  if err = r.ValidateUserOtp(); err != nil {
     return
   }
 
   return
 }
 
-func (a *AuthEntity) ValidateEmail() (err error) {
+func (r AuthEntity) ValidateLoginPayload() (err error) {
 
-  if a.Email == "" {
+  if err = r.ValidateEmail(); err != nil {
+    return
+  }
+
+  if err = r.ValidatePassword(); err != nil {
+    return
+  }
+
+  return
+}
+
+func (r AuthEntity) ValidateEmail() (err error) {
+  if r.Email == "" {
     return response.ErrEmailRequired
   }
 
-  if len(strings.Split(a.Email, "@")) != 2 {
+  if len(strings.Split(r.Email, "@")) != 2 {
     return response.ErrEmailInvalid
   }
 
   return
 }
 
-func (a *AuthEntity) ValidatePassword() (err error) {
+func (r AuthEntity) ValidateName() (err error) {
+  if r.Name == "" {
+    return response.ErrNameRequired
+  }
 
-  if (a.Password == ""){
+  if len(r.Name) < 4 {
+    return response.ErrNameInvalid
+  }
+
+  return
+}
+
+func (r AuthEntity) ValidatePassword() (err error) {
+  if r.Password == "" {
     return response.ErrPasswordRequired
   }
 
-  if len(a.Password) < 6 {
-   return response.ErrPasswordInvalid
+  if len(r.Password) < 6 {
+    return response.ErrPasswordInvalid
+  }
+
+  return
+}
+
+
+func (r AuthEntity) ValidatePasswordConfirmation() (err error) {
+  if r.PasswordConfirmation == "" {
+    return response.ErrPasswordConfirmationRequired
+  }
+
+  if len(r.PasswordConfirmation) < 6 {
+    return response.ErrPasswordConfirmationInvalid
+  }
+
+  if r.Password != r.PasswordConfirmation {
+    return response.ErrPasswordConfirmationNotMatch
+  }
+
+  return
+}
+
+func (r AuthEntity) ValidateUserOtp() (err error) {
+
+  if r.PublicIdUserOtp.String() == "" {
+    return response.ErrPublicIdUserOtpRequired
   }
 
   return
@@ -92,13 +154,14 @@ func (a AuthEntity) IsExists() bool {
   return a.Id != 0
 }
 
-func (a *AuthEntity) EncryptPassword(salt int) (err error) {
-  encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(a.Password), salt)
+func (a *AuthEntity) EncryptPassword(password string, salt int) (err error) {
+  encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(password), salt)
   if err != nil {
-    return err
+    return
   }
 
   a.Password = string(encryptedPassword)
+
   return
 }
 

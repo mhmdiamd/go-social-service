@@ -4,32 +4,36 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/mhmdiamd/go-social-service/infra/response"
 )
 
 type OtpEntity struct {
   Id int `db:"id"`
+  PublicId uuid.UUID `db:"public_id"`
   Otp string `db:"otp"`
   Email string `db:"email"`
-  Password string `db:"password"`
   IsActive int `db:"is_active"`
+  Password string `db:"password"`
   ExpiredAt time.Time `db:"expired_at"`
 
   CreatedAt time.Time `db:"created_at"`
   UpdatedAt time.Time `db:"updated_at"`
 }
 
-func NewOtpEntity(otp string, req SendOtpRequestPayload) OtpEntity {
+func NewOtpEntity(otp, email string) OtpEntity {
+
+  expiredTime := time.Now().Add(time.Minute * time.Duration(30))
+
   entity := OtpEntity{
     Otp: otp,
-    Email: req.Email,
-    Password: req.Password,
-    IsActive: 1,
+    PublicId: uuid.New(),
+    Email: email,
+    IsActive : 1,
+    ExpiredAt: expiredTime,
     CreatedAt: time.Now(),
     UpdatedAt: time.Now(),
   }
-
-  entity.SetExpiredTime()
 
   return entity
 }
@@ -40,7 +44,7 @@ func (a *OtpEntity) Validate() (err error) {
     return 
   }
 
-  if err = a.ValidatePassword(); err != nil {
+ if err = a.ValidateOtp(); err != nil {
     return 
   }
 
@@ -60,21 +64,21 @@ func (a *OtpEntity) ValidateEmail() (err error) {
   return
 }
 
-func (a *OtpEntity) ValidatePassword() (err error) {
+func (a *OtpEntity) ValidateOtp() (err error) {
 
-  if (a.Password == ""){
-    return response.ErrPasswordRequired
+  if a.Otp == "" {
+    return response.ErrOtpRequired
   }
 
-  if len(a.Password) < 6 {
-   return response.ErrPasswordInvalid
+  if len(a.Otp) != 4 {
+    return response.ErrOtpInvalid
   }
 
   return
 }
 
-func (o *OtpEntity) SetExpiredTime() {
-  expiredTime := time.Now().Add(time.Minute * time.Duration(30))
-  o.ExpiredAt = expiredTime
+func (a *OtpEntity) IsExpired() bool {
+  return a.ExpiredAt.Unix() < time.Now().Unix()
 }
+
 
