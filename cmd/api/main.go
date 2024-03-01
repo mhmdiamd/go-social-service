@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhmdiamd/go-social-service/domain/auth"
+	categorycomunity "github.com/mhmdiamd/go-social-service/domain/category-community"
 	"github.com/mhmdiamd/go-social-service/external/database"
 	"github.com/mhmdiamd/go-social-service/internal/config"
 )
@@ -32,6 +33,7 @@ func main() {
   // router.Use(infrafiber.)
 
   auth.Init(router, db)
+  categorycomunity.Init(router, db)
 
   router.Listen(config.Cfg.App.Port)
 }

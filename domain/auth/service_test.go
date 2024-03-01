@@ -51,7 +51,6 @@ func Test_SendOTP(t *testing.T) {
   } else {
 
     t.Run("success", func(t *testing.T) {
-
       req := SendOtpRequestPayload{
         Email: tempEmail,
       }

@@ -34,6 +34,16 @@ var (
   ErrOtpInvalid = errors.New("otp is invalid")
   ErrOtpExpired = errors.New("otp is expired")
   ErrToMuchSendEmail = errors.New("to much send email (more than 3x), your account get blocked")
+
+  // Event Demographics
+  ErrStartAgeRequired = errors.New("start age is required")
+  ErrStartAgeToMax = errors.New("start age is to much bigger, must be lower than 99")
+  ErrStartAgeToMin = errors.New("start age is to much lower, must be greater then 0")
+  ErrStartAgeGreaterThenEndAge = errors.New("start age is greater than end age")
+  ErrEndAgeRequired = errors.New("end age is required")
+  ErrEndAgeToMax = errors.New("end age is to much bigger, must be lower than 99")
+  ErrEndAgeToMin = errors.New("end age is to much lower, must be greater then 0")
+  ErrEndAgeLowerThenStartAge = errors.New("end age is lower than start age")
 )
 
 type Error struct {
@@ -85,6 +95,15 @@ var (
   ErrorOtpInvalid = NewError(ErrOtpInvalid.Error(), "400013", http.StatusBadRequest)
   ErrorOtpExpired = NewError(ErrOtpExpired.Error(), "40901", http.StatusUnauthorized)
   ErrorToMuchSendEmail = NewError(ErrToMuchSendEmail.Error(), "40014", http.StatusBadRequest)
+
+  ErrorStartAgeRequired = NewError(ErrStartAgeRequired.Error(), "40015", http.StatusBadRequest)
+  ErrorStartAgeToMax = NewError(ErrStartAgeToMax.Error(), "40016", http.StatusBadRequest)
+  ErrorStartAgeToMin = NewError(ErrStartAgeToMin.Error(), "40017", http.StatusBadRequest)
+  ErrorStartAgeGreaterThenEndAge = NewError(ErrStartAgeGreaterThenEndAge.Error(), "40018", http.StatusBadRequest)
+  ErrorEndAgeRequired = NewError(ErrEndAgeRequired.Error(), "40019", http.StatusBadRequest)
+  ErrorEndAgeToMax = NewError(ErrEndAgeToMax.Error(), "40020", http.StatusBadRequest)
+  ErrorEndAgeToMin = NewError(ErrEndAgeToMin.Error(), "40021", http.StatusBadRequest)
+  ErrorEndAgeGreaterThenStartAge = NewError(ErrEndAgeGreaterThenStartAge.Error(), "40022", http.StatusBadRequest)
 )
 
 var ErrorMapping = map[string]Error{
@@ -97,14 +116,32 @@ var ErrorMapping = map[string]Error{
   ErrorEmailRequired.Error() : ErrorEmailRequired ,
   ErrorEmailInvalid.Error() : ErrorEmailInvalid,
   ErrorEmailAlreadyUsed.Error() : ErrorEmailAlreadyUsed,
-  ErrorPasswordInvalid.Error() : ErrorPasswordRequired,
+  ErrorPasswordRequired.Error() : ErrorPasswordRequired,
   ErrorPasswordInvalid.Error() : ErrorPasswordInvalid, 
   ErrorPasswordNotMatch.Error() : ErrorPasswordNotMatch,
 
+  // Auth - Register
+  ErrorNameRequired.Error() : ErrorNameRequired ,
+  ErrorNameInvalid.Error() : ErrorNameInvalid,
+  ErrorPasswordConfirmationRequired.Error() : ErrorPasswordConfirmationRequired,
+  ErrorPasswordConfirmationInvalid.Error() : ErrorPasswordConfirmationInvalid, 
+  ErrorPasswordConfirmationNotMatch.Error() : ErrorPasswordConfirmationNotMatch,
   ErrorOtpRequired.Error() : ErrorOtpRequired,
   ErrorOtpInvalid.Error() : ErrorOtpInvalid,
   ErrorOtpExpired.Error() : ErrorOtpExpired,
   ErrorToMuchSendEmail.Error() : ErrorToMuchSendEmail,
+
+  // Auth - Login
+
+  // Event Demographies
+  ErrStartAgeRequired.Error() : ErrorStartAgeRequired,
+  ErrStartAgeToMax.Error() :  ErrorStartAgeToMax,
+  ErrStartAgeToMin.Error() : ErrorStartAgeToMin,
+  ErrStartAgeGreaterThenEndAge.Error() : ErrorStartAgeGreaterThenEndAge, 
+  ErrEndAgeRequired.Error() : ErrorEndAgeRequired,
+  ErrEndAgeToMax.Error() : ErrorEndAgeToMax,
+  ErrEndAgeToMin.Error() : ErrorEndAgeToMin,  
+  ErrEndAgeGreaterThenStartAge.Error() : ErrorEndAgeGreaterThenStartAge,
 }
 
 

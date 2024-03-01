@@ -8,7 +8,6 @@ import (
 	"github.com/mhmdiamd/go-social-service/infra/response"
 )
 
-
 type handler struct {
   svc service
 }
@@ -17,6 +16,70 @@ func newHandler(svc service) handler {
   return handler{
     svc : svc,
   }
+}
+
+func (h handler) sendOtp(ctx *fiber.Ctx) error {
+  req := SendOtpRequestPayload{}
+
+  if err := ctx.BodyParser(&req); err != nil {
+    return infrafiber.NewResponse(
+      infrafiber.WithError(err),
+      infrafiber.WithMessage(err.Error()),
+      infrafiber.WithHttpCode(http.StatusBadRequest),
+    ).Send(ctx)
+  } 
+
+  if err := h.svc.sendOtp(ctx.UserContext(), req); err != nil {
+    myErr, ok := response.ErrorMapping[err.Error()]
+
+    if !ok {
+      myErr = response.ErrorGeneral
+    }
+
+    return infrafiber.NewResponse(
+      infrafiber.WithError(myErr),
+      infrafiber.WithHttpCode(myErr.HttpCode),
+    ).Send(ctx)
+  }
+
+  return infrafiber.NewResponse(
+    infrafiber.WithMessage("success send otp"),
+    infrafiber.WithHttpCode(http.StatusOK),
+  ).Send(ctx)
+}
+
+func (h handler) verifyOtp(ctx *fiber.Ctx) error {
+  req := VerifyOtpRequestPayload{}
+
+  if err := ctx.BodyParser(&req); err != nil {
+    return infrafiber.NewResponse(
+      infrafiber.WithError(err),
+      infrafiber.WithMessage(err.Error()),
+      infrafiber.WithHttpCode(http.StatusBadRequest),
+    ).Send(ctx)
+  } 
+
+  otp_id, err := h.svc.verifyOtp(ctx.UserContext(), req); 
+  if err != nil {
+    myErr, ok := response.ErrorMapping[err.Error()]
+
+    if !ok {
+      myErr = response.ErrorGeneral
+    }
+
+    return infrafiber.NewResponse(
+      infrafiber.WithError(myErr),
+      infrafiber.WithHttpCode(myErr.HttpCode),
+    ).Send(ctx)
+  }
+
+  return infrafiber.NewResponse(
+    infrafiber.WithPayload(map[string]string{
+      "otp_id" : otp_id,
+    }),
+    infrafiber.WithMessage("success verify otp"),
+    infrafiber.WithHttpCode(http.StatusOK),
+  ).Send(ctx)
 }
 
 func (h handler) register(ctx *fiber.Ctx) error {
