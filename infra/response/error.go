@@ -12,6 +12,8 @@ var (
 )
 
 var (
+
+  ErrIdRequired = errors.New("id is required")
   // Auth Error
   ErrPublicIdUserOtpRequired = errors.New("otp id is required")
 
@@ -44,6 +46,8 @@ var (
   ErrEndAgeToMax = errors.New("end age is to much bigger, must be lower than 99")
   ErrEndAgeToMin = errors.New("end age is to much lower, must be greater then 0")
   ErrEndAgeLowerThenStartAge = errors.New("end age is lower than start age")
+
+  ErrGenderInvalid = errors.New("gender invalid, should be male or female")
 )
 
 type Error struct {
@@ -103,7 +107,11 @@ var (
   ErrorEndAgeRequired = NewError(ErrEndAgeRequired.Error(), "40019", http.StatusBadRequest)
   ErrorEndAgeToMax = NewError(ErrEndAgeToMax.Error(), "40020", http.StatusBadRequest)
   ErrorEndAgeToMin = NewError(ErrEndAgeToMin.Error(), "40021", http.StatusBadRequest)
-  ErrorEndAgeGreaterThenStartAge = NewError(ErrEndAgeGreaterThenStartAge.Error(), "40022", http.StatusBadRequest)
+  ErrorEndAgeLowerThenStartAge = NewError(ErrEndAgeLowerThenStartAge.Error(), "40022", http.StatusBadRequest)
+
+  ErrorIdRequired = NewError(ErrIdRequired.Error(), "40023", http.StatusBadRequest)
+
+  ErrorGenderInvalid = NewError(ErrGenderInvalid.Error(), "40024", http.StatusBadRequest)
 )
 
 var ErrorMapping = map[string]Error{
@@ -111,6 +119,8 @@ var ErrorMapping = map[string]Error{
   ErrorGeneral.Error() : ErrorGeneral,
   ErrorNotFound.Error() : ErrorNotFound,
   ErrorUnauthorized.Error() : ErrorUnauthorized,
+
+  ErrorIdRequired.Error() : ErrorIdRequired,
 
   // Auth
   ErrorEmailRequired.Error() : ErrorEmailRequired ,
@@ -131,8 +141,6 @@ var ErrorMapping = map[string]Error{
   ErrorOtpExpired.Error() : ErrorOtpExpired,
   ErrorToMuchSendEmail.Error() : ErrorToMuchSendEmail,
 
-  // Auth - Login
-
   // Event Demographies
   ErrStartAgeRequired.Error() : ErrorStartAgeRequired,
   ErrStartAgeToMax.Error() :  ErrorStartAgeToMax,
@@ -141,7 +149,9 @@ var ErrorMapping = map[string]Error{
   ErrEndAgeRequired.Error() : ErrorEndAgeRequired,
   ErrEndAgeToMax.Error() : ErrorEndAgeToMax,
   ErrEndAgeToMin.Error() : ErrorEndAgeToMin,  
-  ErrEndAgeGreaterThenStartAge.Error() : ErrorEndAgeGreaterThenStartAge,
+  ErrorEndAgeLowerThenStartAge.Error() : ErrorEndAgeLowerThenStartAge,
+
+  ErrorGenderInvalid.Error() : ErrorGenderInvalid,
 }
 
 

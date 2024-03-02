@@ -35,7 +35,6 @@ func init() {
 
 
 func Test_SendOTP(t *testing.T) {
-
   models, _ := svc.repo.GetOtpByEmail(context.Background(), tempEmail)
   if len(models) >= 3 {
     t.Run("fail to much send email", func(t *testing.T) {
