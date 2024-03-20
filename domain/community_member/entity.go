@@ -41,7 +41,7 @@ type CommunityMember struct {
   Role CommunityMemberRole `db:"role"`
   Nik string `db:"nik"`
   IsActive int `db:"is_active"`
-  PhotoKTP int `db:"photo_ktp"`
+  PhotoKTP string `db:"photoktp"`
 
   // user public id foreign key
   UserPublicId string `db:"user_public_id"`
@@ -58,6 +58,8 @@ type CommunityMembers []CommunityMember
 func NewCommunityMemberFromAdd(req AddCommunityMemberRequestPayload) CommunityMember {
   cm := CommunityMember{
     UserPublicId: req.UserPublicId,
+    CommunityId: req.CommunityId,
+    IsActive: 1,
     Role: CommunityMemberRole_member,
     CreatedAt: time.Now(),
     UpdatedAt: time.Now(),
@@ -95,12 +97,24 @@ func (c CommunityMember) Validate() (err error) {
     return
   }
 
+  if err = c.ValidateCommunityId(); err != nil {
+    return
+  }
+
   return
 }
 
 func (c CommunityMember) ValidateUserId() (err error) {
   if c.UserPublicId == "" {
-    return response.ErrIdRequired
+    return response.ErrUserPublicIdRequired
+  }
+
+  return
+}
+
+func (c CommunityMember) ValidateCommunityId() (err error) {
+  if c.CommunityId == 0 {
+    return response.ErrCommunityIdRequired
   }
 
   return

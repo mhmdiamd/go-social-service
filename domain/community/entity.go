@@ -1,6 +1,7 @@
 package community
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -22,7 +23,7 @@ type Community struct {
 
 type CommunityPagination struct {
 	Cursor int `db:"cursor" json:"cursor"`
-	Size   int `size:"size" json:"size"`
+	Size   int `db:"size" json:"size"`
 }
 
 func NewCommunityFromCreate(req CreateCommunityRequestPayload) Community {
@@ -93,7 +94,7 @@ func (c Community) ValidateName() (err error) {
 
 func (c Community) ValidateCategory() (err error) {
 	if c.CategoryCommunityID == 0 {
-		if len(strings.Split(c.ExternalCategories, ",")) == 0 {
+		if len(strings.Split(c.ExternalCategories, ",")) <= 1  && strings.Split(c.ExternalCategories, ",")[0] == ""  {
 			return response.ErrCommunityCategoryIdRequired
 		}
 	}

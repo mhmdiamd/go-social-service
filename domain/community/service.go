@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	communitymember "github.com/mhmdiamd/go-social-service/domain/community_member"
 	"github.com/mhmdiamd/go-social-service/external/google"
 	tempdata "github.com/mhmdiamd/go-social-service/temp_data"
 )
@@ -37,19 +36,19 @@ type CommunityMemberRepository interface {
 	CreateCommunityMember(ctx context.Context, entity CommunityMember) (err error)
 }
 
-type service struct {
-	repo          Repository
-	googleService *google.GoogleDrive
+type Service struct {
+	Repo          Repository
+	GoogleService *google.GoogleDrive
 }
 
-func newService(repo Repository, gs *google.GoogleDrive) service {
-	return service{
-		repo:          repo,
-		googleService: gs,
+func NewService(repo Repository, gs *google.GoogleDrive) Service {
+	return Service{
+		Repo:          repo,
+		GoogleService: gs,
 	}
 }
 
-func (s service) CreateCommunity(ctx context.Context, req CreateCommunityRequestPayload) (err error) {
+func (s Service) CreateCommunity(ctx context.Context, req CreateCommunityRequestPayload) (err error) {
 
 	communityEntity := NewCommunityFromCreate(req)
 
@@ -59,7 +58,7 @@ func (s service) CreateCommunity(ctx context.Context, req CreateCommunityRequest
 	}
 
 	// Start transaction
-	tx, err := s.repo.Begin(ctx)
+	tx, err := s.Repo.Begin(ctx)
 	if err != nil {
 		return
 	}
@@ -68,7 +67,7 @@ func (s service) CreateCommunity(ctx context.Context, req CreateCommunityRequest
 	defer tx.Rollback()
 
 	// Create new Community
-	communityId, err := s.repo.Create(ctx, communityEntity)
+	communityId, err := s.Repo.Create(ctx, communityEntity)
 	if err != nil {
 		return
 	}
@@ -79,23 +78,23 @@ func (s service) CreateCommunity(ctx context.Context, req CreateCommunityRequest
 	reqCommunityMember := CreateCommunityMembersRequestPayload{
 		CommunityId:  communityId,
 		UserPublicId: req.UserPublicId,
-		Role:         communitymember.CommunityMemberRole_owner,
+		Role:         CommunityMemberRole_owner,
 	}
 
 	communityMemberEntity := NewCommunityMembersFromCreate(reqCommunityMember)
-	if err = s.repo.CreateCommunityMember(ctx, communityMemberEntity); err != nil {
+	if err = s.Repo.CreateCommunityMember(ctx, communityMemberEntity); err != nil {
 		return
 	}
 
 	// Commit the transaction
-	if err = s.repo.Commit(ctx, tx); err != nil {
+	if err = s.Repo.Commit(ctx, tx); err != nil {
 		return
 	}
 
 	return
 }
 
-func (s service) UpdateById(ctx context.Context, publicUserId uuid.UUID, req UpdateCommunityRequestPayload) (err error) {
+func (s Service) UpdateById(ctx context.Context, publicUserId uuid.UUID, req UpdateCommunityRequestPayload) (err error) {
 
 	entity := NewCommunityFromUpdate(req)
 
@@ -105,7 +104,7 @@ func (s service) UpdateById(ctx context.Context, publicUserId uuid.UUID, req Upd
 	}
 
 	// Check Image first
-	community, err := s.repo.GetById(ctx, req.Id)
+	community, err := s.Repo.GetById(ctx, req.Id)
 	if err != nil {
 		return
 	}
@@ -114,7 +113,7 @@ func (s service) UpdateById(ctx context.Context, publicUserId uuid.UUID, req Upd
 
 		// Handle if photo not exist
 		if req.Logo != nil {
-			err = s.googleService.UpdateFileById(ctx, community.FileIdGdrive, req.Logo)
+			err = s.GoogleService.UpdateFileById(ctx, community.FileIdGdrive, req.Logo)
 			if err != nil {
 				return
 			}
@@ -123,7 +122,7 @@ func (s service) UpdateById(ctx context.Context, publicUserId uuid.UUID, req Upd
 		entity.FileIdGdrive = community.FileIdGdrive
 		entity.Logo = community.Logo
 
-		err = s.repo.UpdateById(ctx, entity)
+		err = s.Repo.UpdateById(ctx, entity)
 		if err != nil {
 			return
 		}
@@ -131,7 +130,7 @@ func (s service) UpdateById(ctx context.Context, publicUserId uuid.UUID, req Upd
 	} else {
 
 		if req.Logo != nil {
-			fileRes, err := s.googleService.UploadFile(ctx, publicUserId, req.Logo)
+			fileRes, err := s.GoogleService.UploadFile(ctx, publicUserId, req.Logo)
 			if err != nil {
 				return err
 			}
@@ -140,7 +139,7 @@ func (s service) UpdateById(ctx context.Context, publicUserId uuid.UUID, req Upd
 			entity.Logo = fileRes.FileUrl
 		}
 
-		err = s.repo.UpdateById(ctx, entity)
+		err = s.Repo.UpdateById(ctx, entity)
 		if err != nil {
 			return err
 		}
@@ -149,7 +148,7 @@ func (s service) UpdateById(ctx context.Context, publicUserId uuid.UUID, req Upd
 	return
 }
 
-func (s service) DeleteById(ctx context.Context, id int) (err error) {
+func (s Service) DeleteById(ctx context.Context, id int) (err error) {
 
 	// Check the entity first
 	_, err = s.GetById(ctx, id)
@@ -158,7 +157,7 @@ func (s service) DeleteById(ctx context.Context, id int) (err error) {
 	}
 
 	// Create transaction
-	tx, err := s.repo.Begin(ctx)
+	tx, err := s.Repo.Begin(ctx)
 	if err != nil {
 		return
 	}
@@ -166,13 +165,13 @@ func (s service) DeleteById(ctx context.Context, id int) (err error) {
 	defer tx.Rollback()
 
 	// Delete Community By Id
-	err = s.repo.DeleteById(ctx, id)
+	err = s.Repo.DeleteById(ctx, id)
 	if err != nil {
 		return
 	}
 
 	// Delete Community Member By Community Id
-	err = s.repo.DeleteCommunityMemberByIdCommunity(ctx, id)
+	err = s.Repo.DeleteCommunityMemberByIdCommunity(ctx, id)
 	if err != nil {
 		return
 	}
@@ -184,10 +183,10 @@ func (s service) DeleteById(ctx context.Context, id int) (err error) {
 	return
 }
 
-func (s service) GetAll(ctx context.Context, cq ListCommunityRequestPayload) ([]CommunityListResponse, error) {
+func (s Service) GetAll(ctx context.Context, cq ListCommunityRequestPayload) ([]CommunityListResponse, error) {
 	pagination := NewCommunityPaginationFromListCommunityRequest(cq)
 
-	communities, err := s.repo.GetAll(ctx, pagination)
+	communities, err := s.Repo.GetAll(ctx, pagination)
 	if err != nil {
 		return []CommunityListResponse{}, err
 	}
@@ -197,8 +196,8 @@ func (s service) GetAll(ctx context.Context, cq ListCommunityRequestPayload) ([]
 	return communityListResponse, nil
 }
 
-func (s service) GetById(ctx context.Context, id int) (communityRes CommunityDetailResponse, err error) {
-	model, err := s.repo.GetById(ctx, id)
+func (s Service) GetById(ctx context.Context, id int) (communityRes CommunityDetailResponse, err error) {
+	model, err := s.Repo.GetById(ctx, id)
 
 	communityRes = model.ToCommunityResponse()
 	if err != nil {

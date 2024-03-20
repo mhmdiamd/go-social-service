@@ -9,147 +9,146 @@ import (
 )
 
 func Test_ValidateName(t *testing.T) {
-  t.Run("success", func(t *testing.T) {
-    request := RegisterRequestPayload{
-      Name : "Muhamad Ilham",
-      Password : "password",
-      PasswordConfirmation : "password",
-      PublicIdUserOtp : uuid.New(),
-    }
+	t.Run("success", func(t *testing.T) {
+		request := RegisterRequestPayload{
+			Name:                 "Muhamad Ilham",
+			Password:             "password",
+			PasswordConfirmation: "password",
+			PublicIdUserOtp:      uuid.New(),
+		}
 
-    authData := NewAuthEntityFromRegister(request)
+		authData := NewAuthEntityFromRegister(request)
 
-    err := authData.Validate()
-    require.Nil(t, err)
-  })
+		err := authData.Validate()
+		require.Nil(t, err)
+	})
 
-  t.Run("error, required name", func(t *testing.T) {
-    request := RegisterRequestPayload{
-      Name : "",
-      Password : "password",
-      PasswordConfirmation : "password",
-      PublicIdUserOtp : uuid.New(),
-    }
+	t.Run("error, required name", func(t *testing.T) {
+		request := RegisterRequestPayload{
+			Name:                 "",
+			Password:             "password",
+			PasswordConfirmation: "password",
+			PublicIdUserOtp:      uuid.New(),
+		}
 
-    authData := NewAuthEntityFromRegister(request)
+		authData := NewAuthEntityFromRegister(request)
 
-    err := authData.Validate()
+		err := authData.Validate()
 
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrNameRequired, err)
-  })
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrNameRequired, err)
+	})
 
-  t.Run("error, name invalid", func(t *testing.T) {
-    request := RegisterRequestPayload{
-      Name : "asd",
-      Password : "password",
-      PasswordConfirmation : "password",
-      PublicIdUserOtp : uuid.New(),
-    }
+	t.Run("error, name invalid", func(t *testing.T) {
+		request := RegisterRequestPayload{
+			Name:                 "asd",
+			Password:             "password",
+			PasswordConfirmation: "password",
+			PublicIdUserOtp:      uuid.New(),
+		}
 
-    authData := NewAuthEntityFromRegister(request)
+		authData := NewAuthEntityFromRegister(request)
 
-    err := authData.Validate()
+		err := authData.Validate()
 
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrNameInvalid, err)
-  })
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrNameInvalid, err)
+	})
 }
 
 func Test_ValidatePassword(t *testing.T) {
-  t.Run("error, password required", func(t *testing.T) {
-    request := RegisterRequestPayload{
-      Name : "Muhamad Ilham",
-      Password : "",
-      PasswordConfirmation : "password",
-      PublicIdUserOtp : uuid.New(),
-    }
+	t.Run("error, password required", func(t *testing.T) {
+		request := RegisterRequestPayload{
+			Name:                 "Muhamad Ilham",
+			Password:             "",
+			PasswordConfirmation: "password",
+			PublicIdUserOtp:      uuid.New(),
+		}
 
-    authData := NewAuthEntityFromRegister(request)
+		authData := NewAuthEntityFromRegister(request)
 
-    err := authData.Validate()
+		err := authData.Validate()
 
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrPasswordRequired, err)
-  })
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrPasswordRequired, err)
+	})
 
-  t.Run("error, password invalid", func(t *testing.T) {
-    request := RegisterRequestPayload{
-      Name : "Muhamad Ilham",
-      Password : "passw",
-      PasswordConfirmation : "password",
-      PublicIdUserOtp : uuid.New(),
-    }
+	t.Run("error, password invalid", func(t *testing.T) {
+		request := RegisterRequestPayload{
+			Name:                 "Muhamad Ilham",
+			Password:             "passw",
+			PasswordConfirmation: "password",
+			PublicIdUserOtp:      uuid.New(),
+		}
 
-    authData := NewAuthEntityFromRegister(request)
+		authData := NewAuthEntityFromRegister(request)
 
-    err := authData.Validate()
+		err := authData.Validate()
 
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrPasswordInvalid, err)
-  })
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrPasswordInvalid, err)
+	})
 
-  t.Run("error, password confirmation required", func(t *testing.T) {
-    request := RegisterRequestPayload{
-      Name : "Muhamad Ilham",
-      Password : "password",
-      PasswordConfirmation : "",
-      PublicIdUserOtp : uuid.New(),
-    }
+	t.Run("error, password confirmation required", func(t *testing.T) {
+		request := RegisterRequestPayload{
+			Name:                 "Muhamad Ilham",
+			Password:             "password",
+			PasswordConfirmation: "",
+			PublicIdUserOtp:      uuid.New(),
+		}
 
-    authData := NewAuthEntityFromRegister(request)
+		authData := NewAuthEntityFromRegister(request)
 
-    err := authData.Validate()
+		err := authData.Validate()
 
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrPasswordConfirmationRequired, err)
-  })
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrPasswordConfirmationRequired, err)
+	})
 
-  t.Run("error, password confirmation invalid", func(t *testing.T) {
-    request := RegisterRequestPayload{
-      Name : "Muhamad Ilham",
-      Password : "password",
-      PasswordConfirmation : "passw",
-      PublicIdUserOtp : uuid.New(),
-    }
+	t.Run("error, password confirmation invalid", func(t *testing.T) {
+		request := RegisterRequestPayload{
+			Name:                 "Muhamad Ilham",
+			Password:             "password",
+			PasswordConfirmation: "passw",
+			PublicIdUserOtp:      uuid.New(),
+		}
 
-    authData := NewAuthEntityFromRegister(request)
+		authData := NewAuthEntityFromRegister(request)
 
-    err := authData.Validate()
+		err := authData.Validate()
 
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrPasswordConfirmationInvalid, err)
-  })
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrPasswordConfirmationInvalid, err)
+	})
 
-  t.Run("error, password confirmation not match", func(t *testing.T) {
-    request := RegisterRequestPayload{
-      Name : "Muhamad Ilham",
-      Password : "password",
-      PasswordConfirmation : "password23123",
-      PublicIdUserOtp : uuid.New(),
-    }
+	t.Run("error, password confirmation not match", func(t *testing.T) {
+		request := RegisterRequestPayload{
+			Name:                 "Muhamad Ilham",
+			Password:             "password",
+			PasswordConfirmation: "password23123",
+			PublicIdUserOtp:      uuid.New(),
+		}
 
-    authData := NewAuthEntityFromRegister(request)
+		authData := NewAuthEntityFromRegister(request)
 
-    err := authData.Validate()
+		err := authData.Validate()
 
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrPasswordConfirmationNotMatch, err)
-  })
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrPasswordConfirmationNotMatch, err)
+	})
 }
 
 func Test_ValidatePublicIdUserOtp(t *testing.T) {
-  t.Run("error, public id user otp is required", func(t *testing.T) {
-    request := RegisterRequestPayload{
-      Name : "Muhamad Ilham",
-      Password : "password",
-      PasswordConfirmation : "password",
-    }
+	t.Run("error, public id user otp is required", func(t *testing.T) {
+		request := RegisterRequestPayload{
+			Name:                 "Muhamad Ilham",
+			Password:             "password",
+			PasswordConfirmation: "password",
+		}
 
-    authData := NewAuthEntityFromRegister(request)
+		authData := NewAuthEntityFromRegister(request)
 
-    err := authData.Validate()
-    require.NotNil(t, response.ErrPublicIdUserOtpRequired, err)
-  })
+		err := authData.Validate()
+		require.NotNil(t, response.ErrPublicIdUserOtpRequired, err)
+	})
 }
-

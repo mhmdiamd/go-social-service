@@ -12,10 +12,10 @@ import (
 )
 
 type handler struct {
-	svc service
+	svc Service
 }
 
-func newHandler(svc service) handler {
+func newHandler(svc Service) handler {
 	return handler{
 		svc: svc,
 	}
@@ -34,7 +34,7 @@ func (h handler) GetAll(ctx *fiber.Ctx) error {
 
 	community, err := h.svc.GetAll(ctx.UserContext(), req)
 	if err != nil {
-    fmt.Println(err)
+		fmt.Println(err)
 		myErr, ok := response.ErrorMapping[err.Error()]
 
 		if !ok {
@@ -63,7 +63,7 @@ func (h handler) GetById(ctx *fiber.Ctx) error {
 
 	if err != nil {
 
-    fmt.Println(err)
+		fmt.Println(err)
 		return infrafiber.NewResponse(
 			infrafiber.WithMessage("id not valid"),
 			infrafiber.WithHttpCode(http.StatusBadRequest),
@@ -73,7 +73,7 @@ func (h handler) GetById(ctx *fiber.Ctx) error {
 	community, err := h.svc.GetById(ctx.UserContext(), communityId)
 	if err != nil {
 
-    fmt.Println(err)
+		fmt.Println(err)
 		myErr, ok := response.ErrorMapping[err.Error()]
 
 		if !ok {

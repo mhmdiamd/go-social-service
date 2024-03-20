@@ -1,6 +1,7 @@
 package community
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/mhmdiamd/go-social-service/infra/response"
@@ -60,11 +61,11 @@ func Test_EntityCommunityValidation_Fail(t *testing.T) {
   t.Run("fail, category community id required", func(t *testing.T) {
     req := CreateCommunityRequestPayload{
       Name: "example name",
-      CategoryCommunityID: 0,
-      ExternalCategories: []string{},
     }
 
     entity := NewCommunityFromCreate(req)
+
+    fmt.Println(entity)
 
     err := entity.Validate()
     require.NotNil(t, err)

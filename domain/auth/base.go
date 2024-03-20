@@ -6,15 +6,15 @@ import (
 )
 
 func Init(router fiber.Router, db *sqlx.DB) {
-  repo := newRepository(db)
-  svc := newService(repo)
-  handler := newHandler(svc)
+	repo := NewRepository(db)
+	svc := NewService(repo)
+	handler := newHandler(svc)
 
-  authRoute := router.Group("auth")
-  {
-    authRoute.Post("send-otp", handler.sendOtp)
-    authRoute.Post("verify-otp", handler.verifyOtp)
-    authRoute.Post("register", handler.register)
-    authRoute.Post("login", handler.login)
-  }
+	authRoute := router.Group("auth")
+	{
+		authRoute.Post("send-otp", handler.SendOtp)
+		authRoute.Post("verify-otp", handler.VerifyOtp)
+		authRoute.Post("register", handler.Register)
+		authRoute.Post("login", handler.login)
+	}
 }

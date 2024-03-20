@@ -62,6 +62,8 @@ var (
   ErrImageTypeNotCompatible = errors.New("image type not compatible, only png, jpg, jpeg")
   ErrImageOversize = errors.New("image size is oversized, max size 1mb")
 
+  ErrCommunityIdRequired = errors.New("community_id is required")
+  ErrUserPublicIdRequired = errors.New("user id is required")
   ErrCommunityMemberRoleNotPermitted = errors.New("role is not permitted")
 )
 
@@ -135,7 +137,9 @@ var (
   ErrorImageOversize = NewError(ErrImageOversize.Error(), "40028", http.StatusBadRequest)
 
   // Community Member
-  ErrorCommunityMemberRoleNotPermitted =  NewError(ErrCommunityMemberRoleNotPermitted.Error(), "40029", http.StatusBadRequest)
+  ErrorCommunityIdRequired = NewError(ErrCommunityIdRequired.Error(), "40029", http.StatusBadRequest)
+  ErrorUserPublicIdRequired = NewError(ErrUserPublicIdRequired.Error(), "40030", http.StatusBadRequest)
+  ErrorCommunityMemberRoleNotPermitted =  NewError(ErrCommunityMemberRoleNotPermitted.Error(), "40031", http.StatusBadRequest)
 )
 
 var ErrorMapping = map[string]Error{
@@ -184,6 +188,8 @@ var ErrorMapping = map[string]Error{
   ErrImageOversize.Error() : ErrorImageOversize,
 
   // Community member
+  ErrCommunityIdRequired.Error() : ErrorCommunityIdRequired,
+  ErrUserPublicIdRequired.Error() : ErrorUserPublicIdRequired,
   ErrCommunityMemberRoleNotPermitted.Error() : ErrorCommunityMemberRoleNotPermitted,
 }
 

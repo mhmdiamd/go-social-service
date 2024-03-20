@@ -16,8 +16,8 @@ func Init(router fiber.Router, db *sqlx.DB){
 
   googleDriveService := google.NewGoogleDriveService(con)
 
-  repo := newRepository(db)
-  svc := newService(repo, googleDriveService)
+  repo := NewRepository(db)
+  svc := NewService(repo, googleDriveService)
   handler := newHandler(svc)
 
 

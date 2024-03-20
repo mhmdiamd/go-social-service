@@ -3,8 +3,10 @@ package communitymember
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/mhmdiamd/go-social-service/domain/auth"
 	"github.com/mhmdiamd/go-social-service/infra/response"
 )
 
@@ -34,9 +36,9 @@ func (r repository) Rollback(ctx context.Context, tx *sqlx.Tx) (err error) {
 func (r repository) Create(ctx context.Context, cm CommunityMember) (err error) {
   query := `
     INSERT INTO community_members (
-      role, is_active, nik, photo_ktp, user_public_id, community_id, created_at, updated_at 
+      role, is_active, nik, photoktp, user_public_id, community_id, created_at, updated_at 
     ) VALUES (
-      :role, :is_active, :nik, :photo_ktp, :user_public_id, :community_id, :created_at, :updated_at 
+      :role, :is_active, :nik, :photoktp, :user_public_id, :community_id, :created_at, :updated_at 
     )
   `
 
@@ -58,7 +60,7 @@ func (r repository) Create(ctx context.Context, cm CommunityMember) (err error) 
 func (r repository) Update(ctx context.Context, cm CommunityMember) (err error) {
   query := `
     UPDATE community_members
-    SET role=:role, is_active=:is_active, nik=:nik, photo_ktp=:photo_ktp, created_at=:created_at, updated_at=:updated_at 
+    SET role=:role, is_active=:is_active, nik=:nik, photo_ktp=:photoktp, created_at=:created_at, updated_at=:updated_at 
     WHERE community_id=:community_id AND user_public_id=:user_public_id 
   `
 
@@ -108,7 +110,7 @@ func (r repository) UpdateRole(ctx context.Context, memberId string, role Commun
 
 func (r repository) GetAllByCommunityId(ctx context.Context, communityId int, pagination CommunityMemberPagination) (members CommunityMembers, err error)  {
   query := `
-    SELECT id, role, is_active, nik, photo_ktp, user_public_id, community_id, created_at, updated_at
+    SELECT id, role, is_active, nik, photoktp, user_public_id, community_id, created_at, updated_at
     FROM community_members
     WHERE communityId=$1 AND id=$2
     ORDER BY id ASC
@@ -127,7 +129,7 @@ func (r repository) GetAllByCommunityId(ctx context.Context, communityId int, pa
 
 func (r repository) GetDetailMember(ctx context.Context, userId string, communityId int) (member CommunityMember, err error) {
   query := `
-    SELECT id, role, is_active, nik, photo_ktp, user_public_id, community_id, created_at, updated_at
+    SELECT id, role, is_active, nik, photoktp, user_public_id, community_id, created_at, updated_at
     FROM community_members
     WHERE community_id=$1 AND user_public_id=$2
   `
@@ -175,19 +177,22 @@ func (r repository) GetCommunityId(ctx context.Context, communityId int) (member
 }
 
 func (r repository) IsUserAuthExist(ctx context.Context, userId string) (err error) {
- query := `SELECT *FROM auth WHERE public_id=$1`
 
- var member CommunityMember
+  fmt.Println(userId)
+  query := `
+    SELECT 
+      id, public_id, email, password, name, gender, no_tlp, address
+    FROM auth 
+    WHERE public_id=$1
+  `
 
-  err = r.Db.GetContext(ctx, &member, query, userId)
+ var auth auth.AuthEntity
+
+  err = r.Db.GetContext(ctx, &auth, query, userId)
   if err != nil {
     if err == sql.ErrNoRows {
       err = response.ErrNotFound
     }
-  }
-
-  if member.UserPublicId == "" {
-    err = response.ErrNotFound
   }
 
   return

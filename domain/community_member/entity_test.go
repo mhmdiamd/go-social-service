@@ -3,13 +3,15 @@ package communitymember
 import (
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/mhmdiamd/go-social-service/infra/response"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_CommunityMemberValidation_Success(t *testing.T)  {
   req := AddCommunityMemberRequestPayload{
-    UserPublicId : "7eaf37cb-1408-459c-ba13-94d3dbcff0aa",
+    UserPublicId : uuid.NewString(),
+    CommunityId : 123,
   }
 
   cm := NewCommunityMemberFromAdd(req);
@@ -19,13 +21,25 @@ func Test_CommunityMemberValidation_Success(t *testing.T)  {
 }
 
 func Test_CommunityMemberValidation_Failed(t *testing.T) {
-  req := AddCommunityMemberRequestPayload{
-    UserPublicId : "",
-  }
-  cm := NewCommunityMemberFromAdd(req);
+  t.Run("failed, user id is required", func (t *testing.T) {
+    req := AddCommunityMemberRequestPayload{
+      UserPublicId : "",
+    }
+    cm := NewCommunityMemberFromAdd(req);
 
+    err := cm.Validate();
+    require.NotNil(t, err)
+    require.Equal(t, response.ErrUserPublicIdRequired, err)
+  }) 
 
-  err := cm.Validate();
-  require.NotNil(t, err)
-  require.Equal(t, response.ErrIdRequired, err)
+  t.Run("failed, community id is required", func (t *testing.T) {
+    req := AddCommunityMemberRequestPayload{
+      UserPublicId : uuid.NewString(),
+    }
+    cm := NewCommunityMemberFromAdd(req);
+
+    err := cm.Validate();
+    require.NotNil(t, err)
+    require.Equal(t, response.ErrCommunityIdRequired, err)
+  }) 
 }

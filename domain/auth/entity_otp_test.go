@@ -8,105 +8,104 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func Test_ValidationSendOtp(t *testing.T) {
 
-func Test_ValidationSendOTP(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
 
-  t.Run("success", func(t *testing.T) {
+		randOtp := helper.GenerateOTP()
 
-    randOtp := helper.GenerateOTP()
+		email := "am@gmail.com"
 
-    email := "am@gmail.com"
-    
-    payload := NewOtpEntity(randOtp, email)
+		payload := NewOtpEntity(randOtp, email)
 
-    err := payload.Validate()
-    require.Nil(t, err)
-  })
+		err := payload.Validate()
+		require.Nil(t, err)
+	})
 
-  t.Run("fail email invalid", func(t *testing.T){
-    randOtp := helper.GenerateOTP()
+	t.Run("fail email invalid", func(t *testing.T) {
+		randOtp := helper.GenerateOTP()
 
-    email := "amgmail.com"
-    
-    payload := NewOtpEntity(randOtp, email)
+		email := "amgmail.com"
 
-    err := payload.Validate()
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrEmailInvalid, err)
-  })
+		payload := NewOtpEntity(randOtp, email)
 
-  t.Run("fail email is required", func(t *testing.T) {
-    randOtp := helper.GenerateOTP()
+		err := payload.Validate()
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrEmailInvalid, err)
+	})
 
-    email := ""
+	t.Run("fail email is required", func(t *testing.T) {
+		randOtp := helper.GenerateOTP()
 
-    payload := NewOtpEntity(randOtp, email)
+		email := ""
 
-    err := payload.Validate()
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrEmailRequired, err)
-  })
+		payload := NewOtpEntity(randOtp, email)
+
+		err := payload.Validate()
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrEmailRequired, err)
+	})
 }
 
-func Test_ValidationVerifyOTP(t *testing.T) {
+func Test_ValidationVerifyOtp(t *testing.T) {
 
-  t.Run("success", func(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
 
-    randOtp := helper.GenerateOTP()
+		randOtp := helper.GenerateOTP()
 
-    email := "am@gmail.com"
-    
-    payload := NewOtpEntity(randOtp, email)
+		email := "am@gmail.com"
 
-    err := payload.ValidateEmail()
-    require.Nil(t, err)
-  })
+		payload := NewOtpEntity(randOtp, email)
 
-  t.Run("fail email invalid", func(t *testing.T){
-    randOtp := helper.GenerateOTP()
+		err := payload.ValidateEmail()
+		require.Nil(t, err)
+	})
 
-    email := "amgmail.com"
-    
-    payload := NewOtpEntity(randOtp, email)
+	t.Run("fail email invalid", func(t *testing.T) {
+		randOtp := helper.GenerateOTP()
 
-    err := payload.ValidateEmail()
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrEmailInvalid, err)
-  })
+		email := "amgmail.com"
 
-  t.Run("fail email is required", func(t *testing.T) {
-    randOtp := helper.GenerateOTP()
+		payload := NewOtpEntity(randOtp, email)
 
-    email := ""
+		err := payload.ValidateEmail()
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrEmailInvalid, err)
+	})
 
-    payload := NewOtpEntity(randOtp, email)
+	t.Run("fail email is required", func(t *testing.T) {
+		randOtp := helper.GenerateOTP()
 
-    err := payload.ValidateEmail()
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrEmailRequired, err)
-  })
+		email := ""
 
-  t.Run("fail otp invalid", func(t *testing.T){
-    randOtp := helper.GenerateOTP()
+		payload := NewOtpEntity(randOtp, email)
 
-    email := "amgmail.com"
-    
-    payload := NewOtpEntity(randOtp, email)
+		err := payload.ValidateEmail()
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrEmailRequired, err)
+	})
 
-    err := payload.Validate()
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrEmailInvalid, err)
-  })
+	t.Run("fail otp invalid", func(t *testing.T) {
+		randOtp := helper.GenerateOTP()
 
-  t.Run("fail otp is required", func(t *testing.T) {
-    // randOtp := helper.GenerateOTP()
+		email := "amgmail.com"
 
-    email := "am@gmail.com"
+		payload := NewOtpEntity(randOtp, email)
 
-    payload := NewOtpEntity("", email)
+		err := payload.Validate()
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrEmailInvalid, err)
+	})
 
-    err := payload.Validate()
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrOtpRequired, err)
-  })
+	t.Run("fail otp is required", func(t *testing.T) {
+		// randOtp := helper.GenerateOTP()
+
+		email := "am@gmail.com"
+
+		payload := NewOtpEntity("", email)
+
+		err := payload.Validate()
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrOtpRequired, err)
+	})
 }

@@ -12,205 +12,186 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var svc service
-var tempEmail string 
-var tempPassword string 
+var svc Service
+var tempEmail string
+var tempPassword string
 
 func init() {
-  filename := "../../cmd/api/config.yaml"
-  err := config.LoadConfig(filename)
+	filename := "../../cmd/api/config.yaml"
+	err := config.LoadConfig(filename)
 
-  db, err := database.ConnectPostgres(config.Cfg.Db)
-  if err != nil {
-    panic(err)
-  }
+	db, err := database.ConnectPostgres(config.Cfg.Db)
+	if err != nil {
+		panic(err)
+	}
 
-  tempEmail = "milham0141@gmail.com"
-  tempPassword = "password" 
+	tempEmail = "milham0141@gmail.com"
+	tempPassword = "password"
 
-  repo := newRepository(db)
-  svc = newService(repo)
+	repo := NewRepository(db)
+	svc = NewService(repo)
 }
 
+func Test_SendOtp(t *testing.T) {
+	models, _ := svc.Repo.GetOtpByEmail(context.Background(), tempEmail)
+	if len(models) >= 3 {
+		t.Run("fail to much send email", func(t *testing.T) {
+
+			req := SendOtpRequestPayload{
+				Email: tempEmail,
+			}
+
+			err := svc.SendOtp(context.Background(), req)
+			require.NotNil(t, err)
+			require.Equal(t, response.ErrToMuchSendEmail, err)
+
+   
+		})
+	} else {
+
+		t.Run("success", func(t *testing.T) {
+			req := SendOtpRequestPayload{
+				Email: tempEmail,
+			}
+
+      // Then Delete all the otp
+      t.Run("success, delete otp", func(t *testing.T) {
+			  err := svc.Repo.DeleteOtpByEmail(context.Background(), tempEmail)
+        require.Nil(t, err)
+      })
+
+		  t.Run("success, delete user auth", func(t *testing.T) {
+			  // Delete temp account in the database first
+			  err := svc.DeleteAuth(context.Background(), req.Email)
+			  require.Nil(t, err)
+
+			  err = svc.SendOtp(context.Background(), req)
+			  require.Nil(t, err)
+      })
 
 
-func Test_SendOTP(t *testing.T) {
-  models, _ := svc.repo.GetOtpByEmail(context.Background(), tempEmail)
-  if len(models) >= 3 {
-    t.Run("fail to much send email", func(t *testing.T) {
+			t.Run("success verify otp", func(t *testing.T) {
+				req := VerifyOtpRequestPayload{
+					Email: tempEmail,
+					Otp:   tempdata.TempRegisterOtp,
+				}
 
-      req := SendOtpRequestPayload{
-        Email: tempEmail,
-      }
+				_, err := svc.VerifyOtp(context.Background(), req)
+				require.Nil(t, err)
+			})
 
-      err := svc.sendOtp(context.Background(), req)
-      require.NotNil(t, err)
-      require.Equal(t, response.ErrToMuchSendEmail, err)
-    })
-  } else {
+			t.Run("success register user", func(t *testing.T) {
+				req := RegisterRequestPayload{
+					Name:                 "Muhamad Ilham",
+					Password:             tempPassword,
+					PasswordConfirmation: tempPassword,
+					PublicIdUserOtp:      uuid.MustParse(tempdata.TempPublicIdUserOtp),
+				}
 
-    t.Run("success", func(t *testing.T) {
-      req := SendOtpRequestPayload{
-        Email: tempEmail,
-      }
-
-      // Delete temp account in the database first
-      err := svc.deleteAuth(context.Background(), req.Email)
-      require.Nil(t, err)
-
-      err = svc.sendOtp(context.Background(), req)
-      require.Nil(t, err)
-
-        t.Run("success verify otp", func(t *testing.T) {
-          req := VerifyOtpRequestPayload{
-            Email: tempEmail,
-            Otp: tempdata.TempRegisterOtp,
-          }  
-
-          _, err := svc.verifyOtp(context.Background(), req)
-          require.Nil(t, err)
-        })
-
-
-        t.Run("success", func(t *testing.T) {
-          req := RegisterRequestPayload{
-            Name : "Muhamad Ilham",
-            Password : tempPassword,
-            PasswordConfirmation : tempPassword,
-            PublicIdUserOtp : uuid.MustParse(tempdata.TempPublicIdUserOtp),
-          }
-            
-          err := svc.register(context.Background(), req)
-          require.Nil(t, err)
-        })
-    })
-  }
-
-
-  // // error otp get blocked
-  // t.Run("fail, otp get blocked", func(t *testing.T) {
-  //
-  //   req := SendOtpRequestPayload{
-  //     Email: tempEmail,
-  //   }
-  //
-  //   // Delete temp account in the database first
-  //   err := svc.deleteAuth(context.Background(), req.Email)
-  //   require.Nil(t, err)
-  //
-  //   err = svc.sendOtp(context.Background(), req)
-  //   require.Nil(t, err)
-  // })
+				err := svc.Register(context.Background(), req)
+				require.Nil(t, err)
+			})
+		})
+	}
 }
 
 func Test_VerifyOtp(t *testing.T) {
-  // t.Run("success", func(t *testing.T) {
-  //   req := VerifyOtpRequestPayload{
-  //     Email: tempEmail,
-  //     Otp: tempdata.TempRegisterOtp,
-  //   }
-  //
-  //   _, err := svc.verifyOtp(context.Background(), req)
-  //   require.Nil(t, err)
-  // })
+	t.Run("fail, otp invalid", func(t *testing.T) {
+		req := VerifyOtpRequestPayload{
+			Email: tempEmail,
+			Otp:   "2131",
+		}
 
-  t.Run("fail, otp invalid", func(t *testing.T) {
-    req := VerifyOtpRequestPayload{
-      Email: tempEmail,
-      Otp: "2131",
-    }
-
-    _, err := svc.verifyOtp(context.Background(), req)
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrOtpInvalid, err)
-  })
+		_, err := svc.VerifyOtp(context.Background(), req)
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrOtpInvalid, err)
+	})
 }
 
 func Test_Register(t *testing.T) {
-  t.Run("fail, name required", func(t *testing.T) {
-    req := RegisterRequestPayload{
-      Name : "",
-      Password : tempPassword,
-      PasswordConfirmation : tempPassword,
-      PublicIdUserOtp : uuid.New(),
-    }
+	t.Run("fail, name required", func(t *testing.T) {
+		req := RegisterRequestPayload{
+			Name:                 "",
+			Password:             tempPassword,
+			PasswordConfirmation: tempPassword,
+			PublicIdUserOtp:      uuid.New(),
+		}
 
-    err := svc.register(context.Background(), req)
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrNameRequired, err)
-  })
+		err := svc.Register(context.Background(), req)
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrNameRequired, err)
+	})
 
-  t.Run("fail, password required", func(t *testing.T) {
-    req := RegisterRequestPayload{
-      Name : "Muhamad Ilham Darmawan",
-      Password :"" ,
-      PasswordConfirmation : tempPassword,
-      PublicIdUserOtp : uuid.New(),
-    }
+	t.Run("fail, password required", func(t *testing.T) {
+		req := RegisterRequestPayload{
+			Name:                 "Muhamad Ilham Darmawan",
+			Password:             "",
+			PasswordConfirmation: tempPassword,
+			PublicIdUserOtp:      uuid.New(),
+		}
 
-    err := svc.register(context.Background(), req)
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrPasswordRequired, err)
-  })
+		err := svc.Register(context.Background(), req)
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrPasswordRequired, err)
+	})
 
-  t.Run("fail, password confirmation required", func(t *testing.T) {
-    req := RegisterRequestPayload{
-      Name : "Muhamad Ilham Darmawan",
-      Password :  tempPassword, 
-      PasswordConfirmation : "",
-      PublicIdUserOtp : uuid.New(),
-    }
+	t.Run("fail, password confirmation required", func(t *testing.T) {
+		req := RegisterRequestPayload{
+			Name:                 "Muhamad Ilham Darmawan",
+			Password:             tempPassword,
+			PasswordConfirmation: "",
+			PublicIdUserOtp:      uuid.New(),
+		}
 
-    err := svc.register(context.Background(), req)
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrPasswordConfirmationRequired, err)
-  })
+		err := svc.Register(context.Background(), req)
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrPasswordConfirmationRequired, err)
+	})
 
-  t.Run("fail, password confirmation required", func(t *testing.T) {
-    req := RegisterRequestPayload{
-      Name : "Muhamad Ilham Darmawan",
-      Password :  tempPassword, 
-      PasswordConfirmation : "",
-      PublicIdUserOtp : uuid.New(),
-    }
+	t.Run("fail, password confirmation required", func(t *testing.T) {
+		req := RegisterRequestPayload{
+			Name:                 "Muhamad Ilham Darmawan",
+			Password:             tempPassword,
+			PasswordConfirmation: "",
+			PublicIdUserOtp:      uuid.New(),
+		}
 
-    err := svc.register(context.Background(), req)
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrPasswordConfirmationRequired, err)
-  })
+		err := svc.Register(context.Background(), req)
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrPasswordConfirmationRequired, err)
+	})
 }
 
 func Test_Login(t *testing.T) {
-  t.Run("success", func(t *testing.T) {
-    reqLogin := LoginRequestPayload{
-      Email: tempEmail,
-      Password : tempPassword,
-    }
+	t.Run("success", func(t *testing.T) {
+		reqLogin := LoginRequestPayload{
+			Email:    tempEmail,
+			Password: tempPassword,
+		}
 
-    _, err := svc.login(context.Background(), reqLogin)
-    require.Nil(t, err)
-  })
+		_, err := svc.login(context.Background(), reqLogin)
+		require.Nil(t, err)
+	})
 
-  t.Run("error unauthorized", func(t *testing.T) {
-    reqLogin := LoginRequestPayload{
-      Email: "wrong@gmail.com",
-      Password : tempPassword,
-    }
+	t.Run("error unauthorized", func(t *testing.T) {
+		reqLogin := LoginRequestPayload{
+			Email:    "wrong@gmail.com",
+			Password: tempPassword,
+		}
 
-    _, err := svc.login(context.Background(), reqLogin)
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrUnauthorized, err)
-  })
+		_, err := svc.login(context.Background(), reqLogin)
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrUnauthorized, err)
+	})
 
-  t.Run("error password not match", func(t *testing.T) {
-    reqLogin := LoginRequestPayload{
-      Email: tempEmail,
-      Password : "password123",
-    }
+	t.Run("error password not match", func(t *testing.T) {
+		reqLogin := LoginRequestPayload{
+			Email:    tempEmail,
+			Password: "password123",
+		}
 
-    _, err := svc.login(context.Background(), reqLogin)
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrPasswordNotMatch, err)
-  })
+		_, err := svc.login(context.Background(), reqLogin)
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrPasswordNotMatch, err)
+	})
 }
-

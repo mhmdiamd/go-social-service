@@ -1,9 +1,8 @@
 package tempdata
 
 var (
-  TempRegisterOtp string
-  TempPublicIdUserOtp string 
-  LastCommunityID int
+	TempRegisterOtp      string
+	TempPublicIdUserOtp  string
+	TempLastUserPublicId string
+	LastCommunityID      int
 )
-
-

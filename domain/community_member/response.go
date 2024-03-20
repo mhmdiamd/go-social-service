@@ -7,7 +7,7 @@ type CommunityMemberResponse struct {
   Role CommunityMemberRole `json:"role"`
   Nik string `json:"nik"`
   IsActive int `json:"is_active"`
-  PhotoKTP int `json:"photo_ktp"`
+  PhotoKTP string `json:"photo_ktp"`
 
   // user public id foreign key
   UserPublicId string `json:"user_public_id"`
