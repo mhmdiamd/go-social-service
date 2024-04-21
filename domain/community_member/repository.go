@@ -20,7 +20,6 @@ func newRepository(db *sqlx.DB) repository {
   }
 }
 
-
 func (r repository) Begin(ctx context.Context) (tx *sqlx.Tx, err error) {
   return r.Db.BeginTxx(ctx, &sql.TxOptions{})
 }
@@ -112,12 +111,12 @@ func (r repository) GetAllByCommunityId(ctx context.Context, communityId int, pa
   query := `
     SELECT id, role, is_active, nik, photoktp, user_public_id, community_id, created_at, updated_at
     FROM community_members
-    WHERE communityId=$1 AND id=$2
+    WHERE community_id=$1
     ORDER BY id ASC
-    LIMIT $3
+    LIMIT $2
   `
 
-  err = r.Db.SelectContext(ctx, &members, query, communityId, pagination.Cursor, pagination.Size)
+  err = r.Db.SelectContext(ctx, &members, query, communityId, pagination.Size)
   if err != nil {
     if err != sql.ErrNoRows {
       return
@@ -159,14 +158,14 @@ func (r repository) UpdateMemberStatus(ctx context.Context, communityId int, use
   return
 }
   
-func (r repository) GetCommunityId(ctx context.Context, communityId int) (member CommunityMember, err error) {
+func (r repository) GetCommunityById(ctx context.Context, communityId int) (community Community, err error) {
   query := `
     SELECT id, name, description, logo, category_community_id, external_categories, created_at, updated_at, file_id_gdrive
     FROM community
     WHERE id=$1
   `
 
-  err = r.Db.GetContext(ctx, &member, query, communityId)
+  err = r.Db.GetContext(ctx, &community, query, communityId)
   if err != nil {
     if err == sql.ErrNoRows {
       err = response.ErrNotFound

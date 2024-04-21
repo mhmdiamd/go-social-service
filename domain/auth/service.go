@@ -9,6 +9,7 @@ import (
 	"github.com/mhmdiamd/go-social-service/helper"
 	"github.com/mhmdiamd/go-social-service/infra/response"
 	"github.com/mhmdiamd/go-social-service/internal/config"
+	"github.com/mhmdiamd/go-social-service/internal/log"
 	tempdata "github.com/mhmdiamd/go-social-service/temp_data"
 )
 
@@ -113,8 +114,23 @@ func (s Service) SendOtp(ctx context.Context, req SendOtpRequestPayload) (err er
 	// Validating the payload
 	err = otpEntity.ValidateEmail()
 	if err != nil {
+    log.Log.Errorf(ctx, "[SendOtp, ValidateEmail] with error detail %v", err.Error())
 		return
 	}
+
+  // Get is user Exists or not
+  auth, err := s.Repo.GetAuthByEmail(ctx, req.Email)
+  if err != nil {
+    log.Log.Errorf(ctx, "[SendOtp, GetAuthByEmail] with error detail %v", err.Error())
+    return 
+  }
+
+  if auth.Email != "" {
+    err = response.ErrEmailAlreadyUsed
+    log.Log.Errorf(ctx, "[SendOtp, GetAuthByEmail] with error detail %v", err.Error())
+    return
+  }
+
 
 	// Check is otp already exists or not, if yes then regenerate the otp itself
 	userOtps, err := s.Repo.GetOtpByEmail(ctx, req.Email)

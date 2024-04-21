@@ -121,21 +121,44 @@ func Test_VerifyOtp(t *testing.T) {
 }
 
 func Test_AddNewMember(t *testing.T) {
-
 	t.Run("success", func(t *testing.T) {
     req := AddCommunityMemberRequestPayload{
 			Role:         CommunityMemberRole_member,
 			UserPublicId: tempdata.TempLastUserPublicId,
-      CommunityId: 57,
+      CommunityId: 58,
 		}
 
     err := svc.AddMember(context.Background(), req)
     require.Nil(t, err)
 	})
 
-	t.Run("fail, member not found", func(t *testing.T) {
+	t.Run("fail, user not found", func(t *testing.T) {
+    req := AddCommunityMemberRequestPayload{
+			Role:         CommunityMemberRole_member,
+			UserPublicId: uuid.NewString(),
+      CommunityId: 58,
+		}
 
+    err := svc.AddMember(context.Background(), req)
+    require.NotNil(t, err)
+    require.Equal(t, response.ErrNotFound, err)
 	})
 }
 
+func Test_GetAllMemberByCommunityId(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+    pagination := CommunityMemberListRequestPayload{}
+    members, err := svc.GetAllMemberByCommunityId(context.Background(), 58 , pagination)
+    require.Nil(t, err)
+    require.NotNil(t, members)
+	})
+
+	t.Run("fail, user not found", func(t *testing.T) {
+    pagination := CommunityMemberListRequestPayload{}
+    members, err := svc.GetAllMemberByCommunityId(context.Background(), 9999999, pagination)
+    require.NotNil(t, err)
+    require.Nil(t, members)
+    require.Equal(t, response.ErrNotFound, err)
+	})
+}
 

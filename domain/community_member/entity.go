@@ -59,6 +59,7 @@ func NewCommunityMemberFromAdd(req AddCommunityMemberRequestPayload) CommunityMe
   cm := CommunityMember{
     UserPublicId: req.UserPublicId,
     CommunityId: req.CommunityId,
+    Nik: "",
     IsActive: 1,
     Role: CommunityMemberRole_member,
     CreatedAt: time.Now(),

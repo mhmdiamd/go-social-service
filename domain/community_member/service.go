@@ -33,7 +33,7 @@ type CommunityMemberRepository interface {
 }
 
 type CommunityRepository interface {
-  GetCommunityId(ctx context.Context, communityId int) (member CommunityMember, err error)
+  GetCommunityById(ctx context.Context, communityId int) (community Community, err error)
 }
 
 type AuthRepository interface {
@@ -53,7 +53,7 @@ func newService(repo Repository) service {
 func (s service) GetAllMemberByCommunityId(ctx context.Context, communityId int, paginatonPayload CommunityMemberListRequestPayload) (membersConverted []CommunityMemberResponse, err error) {
 
   // Get Community for checking
-  _, err = s.repo.GetCommunityId(ctx, communityId);
+  _, err = s.repo.GetCommunityById(ctx, communityId);
   if err != nil {
     return
   }
