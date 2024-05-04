@@ -8,7 +8,6 @@ import (
 )
 
 func Test_EventDemographicsValidate_Success(t *testing.T) {
-
     payload := CreateEventDemographicsRequestPayload{
       Name: "Cakupan Anak SMK",
       Gender : "",

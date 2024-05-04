@@ -66,6 +66,11 @@ func Test_SendOtp(t *testing.T) {
 				Email: tempEmail,
 			}
 
+      t.Run("success, send otp to email", func (t *testing.T) {
+        err := authService.SendOtp(context.Background(), req)
+        require.Nil(t, err)
+      })
+
 		   // Then Delete all the otp
       t.Run("success, delete otp", func(t *testing.T) {
 			  err := authService.Repo.DeleteOtpByEmail(context.Background(), tempEmail)

@@ -43,9 +43,7 @@ func Test_SendOtp(t *testing.T) {
 
 			err := svc.SendOtp(context.Background(), req)
 			require.NotNil(t, err)
-			require.Equal(t, response.ErrToMuchSendEmail, err)
-
-   
+			require.Equal(t, response.ErrToMuchSendEmail, err)  
 		})
 	} else {
 

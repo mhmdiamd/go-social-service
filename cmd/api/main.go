@@ -7,6 +7,7 @@ import (
 	"github.com/mhmdiamd/go-social-service/domain/auth"
 	categoryComunity "github.com/mhmdiamd/go-social-service/domain/category-community"
 	"github.com/mhmdiamd/go-social-service/domain/community"
+	communityMember "github.com/mhmdiamd/go-social-service/domain/community_member"
 	eventDemographics "github.com/mhmdiamd/go-social-service/domain/event-demographics"
 	"github.com/mhmdiamd/go-social-service/external/database"
 	"github.com/mhmdiamd/go-social-service/internal/config"
@@ -38,6 +39,7 @@ func main() {
   categoryComunity.Init(router, db)
   eventDemographics.Init(router, db)
   community.Init(router, db)
+  communityMember.Init(router, db)
 
   router.Listen(config.Cfg.App.Port)
 }

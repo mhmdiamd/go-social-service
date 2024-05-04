@@ -22,7 +22,6 @@ func newHandler(svc Service) handler {
 }
 
 func (h handler) GetAll(ctx *fiber.Ctx) error {
-
 	var req ListCommunityRequestPayload
 
 	if err := ctx.QueryParser(&req); err != nil {
