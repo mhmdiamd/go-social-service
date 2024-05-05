@@ -1,6 +1,7 @@
 package communitymember
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -24,6 +25,7 @@ func (h *handler) GetAllMemberByCommunityId(ctx *fiber.Ctx) error {
   var req CommunityMemberListRequestPayload
 
   community_id, err := ctx.ParamsInt("community_id", 0)
+  fmt.Println(community_id)
 
   if err != nil {
     return infrafiber.NewResponse(
@@ -59,48 +61,13 @@ func (h *handler) GetAllMemberByCommunityId(ctx *fiber.Ctx) error {
     ).Send(ctx)
   }
 
+  pagination := req.GenerateDefaultValue()
   return infrafiber.NewResponse(
-    infrafiber.WithQuery(req),
+    infrafiber.WithQuery(pagination),
     infrafiber.WithHttpCode(http.StatusOK),
     infrafiber.WithMessage("success get list member"),
     infrafiber.WithPayload(map[string]interface{} {
       "data" : members,
-    }),
-  ).Send(ctx)
-}
-
-func (h *handler) GetDetailMemberById(ctx *fiber.Ctx) error {
-  
-  memberId := ctx.Params("member_id", "")
-  communityId, err := ctx.ParamsInt("community_id", 0);
-
-  if err != nil || communityId == 0 || memberId == ""{
-    return infrafiber.NewResponse(
-      infrafiber.WithMessage("invalid payload"),
-      infrafiber.WithError(response.ErrorBadRequest),
-    ).Send(ctx)
-  }
-
-  member, err := h.svc.repo.GetDetailMember(ctx.UserContext(), memberId, communityId);
-  if err != nil {
-    myErr, ok := response.ErrorMapping[err.Error()];
-
-    if !ok {
-      myErr = response.ErrorGeneral
-    }
-
-    return infrafiber.NewResponse(
-      infrafiber.WithError(myErr),
-      infrafiber.WithMessage(myErr.Error()),
-    ).Send(ctx)
-  }
-
-
-  return infrafiber.NewResponse(
-    infrafiber.WithHttpCode(http.StatusOK),
-    infrafiber.WithMessage("success get detail member"),
-    infrafiber.WithPayload(map[string]interface{}{
-      "data" : member,
     }),
   ).Send(ctx)
 }
@@ -137,7 +104,7 @@ func (h *handler) CreateNewMember(ctx *fiber.Ctx) error {
 
 func (h *handler) DeleteMemberById(ctx *fiber.Ctx) error {
   memberId := ctx.Params("member_id", "")
-  communityId, err := ctx.ParamsInt("communityId", 0)
+  communityId, err := ctx.ParamsInt("community_id", 0)
 
   if memberId == "" || err != nil || communityId == 0 {
     return infrafiber.NewResponse(
@@ -189,6 +156,8 @@ func (h *handler) UpdateMemberById(ctx *fiber.Ctx) error {
   req.UserPublicId = memberId
   req.CommunityId = communityId 
   err = h.svc.Update(ctx.UserContext(), req)
+  fmt.Println(err)
+
   if err != nil {
     myErr, ok := response.ErrorMapping[err.Error()]
 

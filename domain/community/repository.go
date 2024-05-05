@@ -189,9 +189,9 @@ func (r repository) GetAllCommunityMemberByIdCommunity(ctx context.Context, comm
 func (r repository) CreateCommunityMember(ctx context.Context, entity CommunityMember) (err error) {
   query := `
     INSERT INTO community_members (
-      community_id, user_public_id, role, is_active
+      community_id, user_public_id, role, photoktp, nik, is_active
     ) VALUES (
-      :community_id, :user_public_id, :role, :is_active
+      :community_id, :user_public_id, :role, :photoktp, :nik, :is_active
     )
   `
 

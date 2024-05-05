@@ -26,7 +26,7 @@ type UpdateCommunityMemberRequestPayload struct {
 func (c CommunityMemberListRequestPayload) GenerateDefaultValue() CommunityMemberListRequestPayload {
 
 	if c.Cursor <= 0 {
-		c.Cursor = 1
+		c.Cursor = 0
 	}
 
 	if c.Size <= 0 {

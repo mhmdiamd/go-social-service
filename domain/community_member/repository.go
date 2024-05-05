@@ -59,7 +59,7 @@ func (r repository) Create(ctx context.Context, cm CommunityMember) (err error) 
 func (r repository) Update(ctx context.Context, cm CommunityMember) (err error) {
   query := `
     UPDATE community_members
-    SET role=:role, is_active=:is_active, nik=:nik, photo_ktp=:photoktp, created_at=:created_at, updated_at=:updated_at 
+    SET role=:role, is_active=:is_active, nik=:nik, photoktp=:photoktp, created_at=:created_at, updated_at=:updated_at 
     WHERE community_id=:community_id AND user_public_id=:user_public_id 
   `
 
@@ -81,10 +81,10 @@ func (r repository) Update(ctx context.Context, cm CommunityMember) (err error) 
 func (r repository) Delete(ctx context.Context, userId string, communityId int) (err error) {
   query := `
     DELETE FROM community_members
-    WHERE community_id=:community_id AND user_public_id=:user_public_id 
+    WHERE community_id=$1 AND user_public_id=$2 
   `
 
-  _, err = r.Db.QueryContext(ctx, query, userId, communityId)
+  _, err = r.Db.QueryContext(ctx, query, communityId, userId)
   if err != nil {
     return
   }
@@ -111,12 +111,12 @@ func (r repository) GetAllByCommunityId(ctx context.Context, communityId int, pa
   query := `
     SELECT id, role, is_active, nik, photoktp, user_public_id, community_id, created_at, updated_at
     FROM community_members
-    WHERE community_id=$1
+    WHERE community_id=$1 AND id>=$2
     ORDER BY id ASC
-    LIMIT $2
+    LIMIT $3
   `
 
-  err = r.Db.SelectContext(ctx, &members, query, communityId, pagination.Size)
+  err = r.Db.SelectContext(ctx, &members, query, communityId, pagination.Cursor, pagination.Size)
   if err != nil {
     if err != sql.ErrNoRows {
       return

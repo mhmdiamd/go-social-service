@@ -27,12 +27,12 @@ func Init(router fiber.Router, db *sqlx.DB){
     communityRoute.Get("", handler.GetAll)
 
     // Authorization middleware
-    communityRoute.Use(infrafiber.CheckAuth())
+    // communityRoute.Use(infrafiber.CheckAuth())
 
-    communityRoute.Get("/:id", handler.GetById)
-    communityRoute.Post("", handler.Create)
-    communityRoute.Put("/:id", handler.UpdateById)
-    communityRoute.Delete("/:id", handler.DeleteById)
+    communityRoute.Get("/:id", infrafiber.CheckAuth(), handler.GetById)
+    communityRoute.Post("", infrafiber.CheckAuth(), handler.Create)
+    communityRoute.Put("/:id", infrafiber.CheckAuth(), handler.UpdateById)
+    communityRoute.Delete("/:id", infrafiber.CheckAuth(), handler.DeleteById)
   }
 
 } 

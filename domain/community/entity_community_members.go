@@ -28,7 +28,7 @@ type CommunityMember struct {
 	Role     CommunityMemberRole `db:"role"`
 	Nik      string              `db:"nik"`
 	IsActive int                 `db:"is_active"`
-	PhotoKTP int                 `db:"photoktp"`
+	PhotoKTP string                `db:"photoktp"`
 
 	// user public id foreign key
 	UserPublicId uuid.UUID `db:"user_public_id"`
@@ -46,6 +46,8 @@ func NewCommunityMembersFromCreate(req CreateCommunityMembersRequestPayload) Com
 		UserPublicId: req.UserPublicId,
 		Role:         CommunityMemberRole_member,
 		IsActive:     1,
+    PhotoKTP: "",
+    Nik : "",
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}

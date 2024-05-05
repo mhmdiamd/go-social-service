@@ -24,8 +24,9 @@ type UpdateCommunityRequestPayload struct {
 
 type CreateCommunityMembersRequestPayload struct {
 	Nik      string              `json:"nik"`
-	PhotoKTP int                 `json:"photo_ktp"`
+	PhotoKTP string                `json:"photo_ktp"`
 	Role      CommunityMemberRole  `json:"role"`
+	IsActive int `json:"is_active"`
 	// user public id foreign key
 	UserPublicId uuid.UUID `json:"user_public_id"`
 	// Community Id

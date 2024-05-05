@@ -77,6 +77,7 @@ func NewCommunityMemberFromAdd(req AddCommunityMemberRequestPayload) CommunityMe
 func NewCommunityMemberFromUpdate(req UpdateCommunityMemberRequestPayload) CommunityMember {
   cm := CommunityMember{
     UserPublicId: req.UserPublicId,
+    CommunityId: req.CommunityId,
     Role: CommunityMemberRole_member,
     PhotoKTP: req.PhotoKTP ,
     Nik: req.Nik,

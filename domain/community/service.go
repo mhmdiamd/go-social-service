@@ -78,6 +78,7 @@ func (s Service) CreateCommunity(ctx context.Context, req CreateCommunityRequest
 	reqCommunityMember := CreateCommunityMembersRequestPayload{
 		CommunityId:  communityId,
 		UserPublicId: req.UserPublicId,
+    IsActive: 1,
 		Role:         CommunityMemberRole_owner,
 	}
 
