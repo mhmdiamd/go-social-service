@@ -59,6 +59,12 @@ func LogTrace() fiber.Handler {
   }
 }
 
+func CheckIsAdmin() fiber.Handler {
+  return func(c *fiber.Ctx) error {
+    return nil
+  }
+}
+
 func CheckAuth() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authorization := c.Get("authorization")

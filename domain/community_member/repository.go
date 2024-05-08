@@ -32,7 +32,7 @@ func (r repository) Rollback(ctx context.Context, tx *sqlx.Tx) (err error) {
   return tx.Rollback()
 }
 
-func (r repository) Create(ctx context.Context, cm CommunityMember) (err error) {
+func (r repository) Create(ctx context.Context, tx *sqlx.Tx, cm CommunityMember) (err error) {
   query := `
     INSERT INTO community_members (
       role, is_active, nik, photoktp, user_public_id, community_id, created_at, updated_at 
@@ -41,7 +41,7 @@ func (r repository) Create(ctx context.Context, cm CommunityMember) (err error) 
     )
   `
 
-  stmt, err  := r.Db.PrepareNamedContext(ctx, query)
+  stmt, err  := tx.PrepareNamedContext(ctx, query)
   if err != nil {
     return
   }

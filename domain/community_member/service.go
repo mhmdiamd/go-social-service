@@ -22,7 +22,7 @@ type CommunityMemberTransactionRepository interface {
 }
 
 type CommunityMemberRepository interface {
-  Create(ctx context.Context, cm CommunityMember) (err error)
+  Create(ctx context.Context, tx *sqlx.Tx, cm CommunityMember) (err error)
   Update(ctx context.Context, cm CommunityMember) (err error)
   Delete(ctx context.Context, userId string, communityId int) (err error)
   UpdateRole(ctx context.Context, memberId string, role CommunityMemberRole) (err error)
@@ -84,17 +84,27 @@ func (s service) AddMember(ctx context.Context, req AddCommunityMemberRequestPay
     return
   }
 
+  tx, err := s.repo.Begin(ctx)
+  if err != nil {
+    return
+  }
+
   // Chech is user alredy exists
   if err = s.repo.IsUserAuthExist(ctx, cm.UserPublicId); err != nil {
     log.Log.Errorf(ctx, "[AddMember, IsUserAuthExist] with error detail %v", err.Error())
     return
   }
-
-  if err = s.repo.Create(ctx, cm); err != nil {
+  
+  if err = s.repo.Create(ctx, tx, cm); err != nil {
     log.Log.Errorf(ctx, "[AddMember, Create] with error detail %v", err.Error())
     return
   }
 
+  if err = s.repo.Commit(ctx, tx); err != nil {
+    return
+  }
+
+  defer s.repo.Rollback(ctx, tx)
   return
 }
 
