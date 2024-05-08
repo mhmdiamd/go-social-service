@@ -133,8 +133,6 @@ func Test_AddNewMember(t *testing.T) {
       CommunityId: 65,
 		}
 
-    fmt.Println(req)
-
     err := svc.AddMember(context.Background(), req)
     require.Nil(t, err)
 	})
@@ -159,5 +157,162 @@ func Test_GetAllMemberByCommunityId(t *testing.T) {
     require.Nil(t, err)
     require.NotNil(t, members)
 	})
+}
+
+func Test_UpdateMember(t *testing.T) {
+  type Mock struct {
+    Status string
+    Payload UpdateCommunityMemberRequestPayload
+    Err error
+  }
+
+  // Get detail user 
+  member, err := svc.repo.GetDetailMember(context.Background(), tempdata.TempLastUserPublicId, 65)
+  if err != nil {
+    panic(err)
+  }
+
+  var data = map[string]Mock{
+    "update community member" : {
+      Status: "success",
+      Payload: UpdateCommunityMemberRequestPayload {
+        CommunityId: 65,
+        UserPublicId: member.UserPublicId,
+        Nik: member.Nik,
+        Role : member.Role,
+        IsActive: member.IsActive,
+        PhotoKTP: member.PhotoKTP,
+      },
+      Err : nil,
+    },
+
+    "member not found" : {
+      Status: "fail",
+      Payload: UpdateCommunityMemberRequestPayload {
+        CommunityId: 65,
+        UserPublicId: uuid.NewString(),
+        Nik: member.Nik,
+        Role : member.Role,
+        IsActive: member.IsActive,
+        PhotoKTP: member.PhotoKTP,
+      },
+      Err : response.ErrNotFound,
+    },
+
+    "community not found" : {
+      Status: "fail",
+      Payload: UpdateCommunityMemberRequestPayload {
+        CommunityId: 9999,
+        UserPublicId: uuid.NewString(),
+        Nik: member.Nik,
+        Role : member.Role,
+        IsActive: member.IsActive,
+        PhotoKTP: member.PhotoKTP,
+      },
+      Err : response.ErrNotFound,
+    },
+  }
+
+  for i, m := range data {
+    t.Run(fmt.Sprintf("%s, %s", m.Status, i), func (t *testing.T) {
+      err := svc.Update(context.Background(), m.Payload);
+      
+      if m.Err != nil {
+        require.NotNil(t, err)
+        require.Equal(t, m.Err , err)
+      }else {
+        require.Nil(t, err)
+      }
+    })
+  }
+}
+
+func Test_KickMember(t *testing.T) {
+
+  type Req struct {
+    EditorId string 
+    MemberId string 
+    CommunityId int
+  }
+
+  type Mock struct {
+    Status string
+    Payload Req
+    Err error
+  }
+
+  // Get detail user 
+  editor, err := svc.repo.GetDetailMember(context.Background(), "4631d7f4-ebe6-4065-9d42-a6b89aa639ad", 65)
+  if err != nil {
+    panic(err)
+  }
+
+  var data = map[string]Mock{
+    "kick community member" : {
+      Status: "success",
+      Payload: Req {
+        CommunityId: 65,
+        MemberId : tempdata.TempLastUserPublicId,
+        EditorId : editor.UserPublicId,
+      },
+      Err : nil,
+    },
+
+    "not permitted" : {
+      Status: "fail",
+      Payload: Req {
+        CommunityId: 65,
+        MemberId : uuid.NewString(),
+        EditorId : tempdata.TempLastUserPublicId,
+      },
+      Err : response.ErrCommunityMemberRoleNotPermitted,
+    },
+
+    "member not found" : {
+      Status: "fail",
+      Payload: Req {
+        CommunityId: 65,
+        MemberId : uuid.NewString(),
+        EditorId : editor.UserPublicId,
+      },
+      Err : response.ErrNotFound,
+    },
+
+    "community not found" : {
+      Status: "fail",
+      Payload: Req {
+        CommunityId: 999,
+        MemberId : tempdata.TempLastUserPublicId,
+        EditorId : editor.UserPublicId,
+      },
+      Err : response.ErrNotFound,
+    },
+  }
+
+  for i, m := range data {
+    t.Run(fmt.Sprintf("%s, %s", m.Status, i), func (t *testing.T) {
+      err := svc.KickMember(context.Background(), m.Payload.EditorId, m.Payload.MemberId, m.Payload.CommunityId);
+      
+      if m.Err != nil {
+        require.NotNil(t, err)
+        require.Equal(t, m.Err , err)
+      }else {
+        require.Nil(t, err)
+      }
+    })
+  }
+}
+
+func Test_DeleteMember(t *testing.T) {
+  t.Run("success, delete member", func (t *testing.T) {
+    err := svc.DeleteCommunityMember(context.Background(), tempdata.TempLastUserPublicId, 65)
+    require.Nil(t, err)
+  })
+
+  t.Run("fail, member not found", func(t *testing.T) {
+    err := svc.DeleteCommunityMember(context.Background(), tempdata.TempLastUserPublicId, 65)
+    require.NotNil(t, err)
+    require.Equal(t, response.ErrNotFound, err)
+  })
 }
 

@@ -146,11 +146,7 @@ func (s Service) SendOtp(ctx context.Context, req SendOtpRequestPayload) (err er
 	tempdata.TempRegisterOtp = otp
 
 	newSmtpHeader := google.NewSendEmailHeader(header)
-	err = newSmtpHeader.SendGmailWithSMTP()
-
-	if err != nil {
-		return response.ErrBadRequest
-	}
+	go newSmtpHeader.SendGmailWithSMTP()
 
 	// Deactivated existing OTP
 	err = s.Repo.UnactiveOtp(ctx, req.Email)
@@ -192,7 +188,6 @@ func (s Service) VerifyOtp(ctx context.Context, req VerifyOtpRequestPayload) (ot
 }
 
 func (s Service) DeleteAuth(ctx context.Context, email string) (err error) {
-
 	err = s.Repo.DeleteAuthByEmail(ctx, email)
 	if err != nil {
     fmt.Println(err)
