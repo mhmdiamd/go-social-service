@@ -1,9 +1,19 @@
 package event
 
-import "time"
+import (
+	"time"
+
+)
+
+type CreateEventCommiteRequestPayload struct {
+  UserPublicId string 
+  EventPublicId string
+  Position Position
+}
 
 type CreateEventRequestPayload struct {
   Name string `json:"name"`
+  UserPublicId string `json:"user_public_id"`
   Description string `json:"description"`
   Address string `json:"address"`
   Thumbnail string `json:"thumbnail"`
@@ -27,7 +37,7 @@ type ListEventRequestPayload struct {
 }
 
 func (l ListEventRequestPayload) GenerateDefaultValue() ListEventRequestPayload {
-  if l.Cursor < 0 {
+  if l.Cursor <= 0 {
     l.Cursor = 0
   }
 

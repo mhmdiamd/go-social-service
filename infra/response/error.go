@@ -65,6 +65,9 @@ var (
   ErrCommunityIdRequired = errors.New("community_id is required")
   ErrUserPublicIdRequired = errors.New("user id is required")
   ErrCommunityMemberRoleNotPermitted = errors.New("role is not permitted")
+
+  // Error Event
+  ErrEventPublicIdRequired = errors.New("event_id is required")
 )
 
 type Error struct {
@@ -140,6 +143,9 @@ var (
   ErrorCommunityIdRequired = NewError(ErrCommunityIdRequired.Error(), "40029", http.StatusBadRequest)
   ErrorUserPublicIdRequired = NewError(ErrUserPublicIdRequired.Error(), "40030", http.StatusBadRequest)
   ErrorCommunityMemberRoleNotPermitted =  NewError(ErrCommunityMemberRoleNotPermitted.Error(), "40031", http.StatusBadRequest)
+
+  // Event
+  ErrorEventPublicIdRequired =  NewError(ErrEventPublicIdRequired.Error(), "40031", http.StatusBadRequest)
 )
 
 var ErrorMapping = map[string]Error{
@@ -191,6 +197,9 @@ var ErrorMapping = map[string]Error{
   ErrCommunityIdRequired.Error() : ErrorCommunityIdRequired,
   ErrUserPublicIdRequired.Error() : ErrorUserPublicIdRequired,
   ErrCommunityMemberRoleNotPermitted.Error() : ErrorCommunityMemberRoleNotPermitted,
+
+  // event
+  ErrEventPublicIdRequired.Error() : ErrorEventPublicIdRequired,
 }
 
 

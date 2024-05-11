@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/mhmdiamd/go-social-service/external/jwt"
+	infrafiber "github.com/mhmdiamd/go-social-service/infra/fiber"
 	"github.com/mhmdiamd/go-social-service/infra/response"
 	"github.com/mhmdiamd/go-social-service/internal/config"
 	infralog "github.com/mhmdiamd/go-social-service/internal/log"
@@ -61,6 +63,15 @@ func LogTrace() fiber.Handler {
 
 func CheckIsAdmin() fiber.Handler {
   return func(c *fiber.Ctx) error {
+    role := c.Locals("ROLE").(string)
+
+    if role != "admin" {
+      return infrafiber.NewResponse(
+        infrafiber.WithError(response.ErrorUnauthorized),
+        infrafiber.WithHttpCode(http.StatusUnauthorized),
+      ).Send(c)
+    }
+
     return nil
   }
 }

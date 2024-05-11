@@ -117,3 +117,17 @@ func (e Event) ValidateDate() (err error) {
 
   return
 }
+
+func (e *Event) ConvertToEventResponse() EventResponse {
+  return EventResponse{
+    Id: e.Id ,
+    PublicId : e.PublicId ,
+    Name : e.Name,
+    Description : e.Description,
+    Address : e.Address, 
+    Thumbnail : e.Thumbnail,
+    StartDate : e.StartDate, 
+    EndDate : e.EndDate,
+  }
+}
+
