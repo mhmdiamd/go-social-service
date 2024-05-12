@@ -21,11 +21,11 @@ type EventTransactionRepository interface {
 
 type EventRepository interface {
   Create(ctx context.Context, tx *sqlx.Tx, entity Event) (err error)
-  Update(ctx context.Context, public_id uuid.UUID, entity Event) (err error)
-  DeleteById(ctx context.Context, public_id uuid.UUID) (err error)
+  Update(ctx context.Context, tx *sqlx.Tx, entity Event) (err error)
+  DeleteById(ctx context.Context, eventPublicId string) (err error)
 
   GetAllWithPagination(ctx context.Context, pagination ListEventRequestPayload) (events []Event, err error)
-  GetById(ctx context.Context, public_id uuid.UUID) (events Event, err error)
+  GetDetailById(ctx context.Context, event_public_id string) (event Event, err error)
 }
 
 type EventCommiteRepository interface {
@@ -51,6 +51,15 @@ func (s *service) GetAllWithPagination(ctx context.Context, req ListEventRequest
   return ConvertToEventResponseList(entities), nil
 }
 
+func (s *service) GetDetailById(ctx context.Context, event_id string) (event Event, err error) {
+  event, err = s.repo.GetDetailById(ctx, event_id); 
+  if err != nil {
+    return
+  }
+
+  return
+}
+
 func (s *service) Create(ctx context.Context, req CreateEventRequestPayload) (err error) {
   
   event := NewEventFromCreate(req)
@@ -72,7 +81,7 @@ func (s *service) Create(ctx context.Context, req CreateEventRequestPayload) (er
 
   commite := EventCommite{
     UserPublicId: req.UserPublicId,
-    EventPublicId: event.PublicId.String(),
+    EventPublicId: event.PublicId,
     Position: EventPosition_Admin,
   }
   // Create Event Commite admin
@@ -88,11 +97,48 @@ func (s *service) Create(ctx context.Context, req CreateEventRequestPayload) (er
   return 
 }
 
-func (e *Event) Update(ctx context.Context, req UpdateEventRequestPayload) (err error) {
+func (s *service) Update(ctx context.Context, req UpdateEventRequestPayload) (err error) {
+
+  newEvent := NewEventFromUpdate(req)
+
+  tx, err := s.repo.Begin(ctx)
+  if err != nil {
+    return
+  }
+
+  // make sure that event id is exist
+  _, err = s.repo.GetDetailById(ctx, newEvent.PublicId)
+  if err != nil {
+    return
+  }
+
+  // Update the event by event_id
+  if err = s.repo.Update(ctx, tx, newEvent); err != nil {
+    return 
+  }
+
+  // Commite the transactions
+  if err = s.repo.Commite(ctx, tx); err != nil {
+    return
+  }
+
+  defer s.repo.Rollback(ctx, tx)
   return 
 }
 
-func (e *Event) DeleteById(ctx context.Context, UserPublicId string) (err error) {
+func (s *service) DeleteById(ctx context.Context, eventPublicId string) (err error) {
+
+  // Check is the event exist
+  _, err = s.repo.GetDetailById(ctx, eventPublicId); 
+  if err != nil {
+    return
+  }
+
+  // Delete the Event
+  if err = s.repo.DeleteById(ctx, eventPublicId); err != nil {
+    return
+  }
+
   return
 }
 

@@ -10,10 +10,10 @@ type CreateEventCommiteRequestPayload struct {
   EventPublicId string
   Position Position
 }
-
+ 
 type CreateEventRequestPayload struct {
   Name string `json:"name"`
-  UserPublicId string `json:"user_public_id"`
+  UserPublicId string `json:"user_public_id"` 
   Description string `json:"description"`
   Address string `json:"address"`
   Thumbnail string `json:"thumbnail"`
@@ -23,6 +23,7 @@ type CreateEventRequestPayload struct {
 
 
 type UpdateEventRequestPayload struct {
+  PublicId string `json:"event_public_id"`
   Name string `json:"name"`
   Description string `json:"description"`
   Address string `json:"address"`

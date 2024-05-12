@@ -3,13 +3,12 @@ package event
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/mhmdiamd/go-social-service/infra/response"
 )
 
 type Event struct {
   Id string `db:"-"`
-  PublicId uuid.UUID `db:"public_id" json:"public_id"`
+  PublicId string `db:"public_id" json:"public_id"`
   Name string `db:"name" json:"name"`
   Description string `db:"description" json:"description"`
   Address string `db:"address" json:"address"`
@@ -47,6 +46,7 @@ func NewEventFromCreate(req CreateEventRequestPayload) Event {
 
 func NewEventFromUpdate(req UpdateEventRequestPayload) Event {
   return Event{
+    PublicId: req.PublicId,
     Name: req.Name,
     Description: req.Description,
     Address: req.Address,
