@@ -5,4 +5,7 @@ var (
 	TempPublicIdUserOtp  string
 	TempLastUserPublicId string
 	LastCommunityID      int
+
+  // Event
+  TempCurrentEventPublicId string
 )

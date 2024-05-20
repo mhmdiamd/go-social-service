@@ -7,5 +7,4 @@ CREATE TABLE event_commite (
   position EVENT_POSITION NOT NULL,
   created_at timestamp NOT NULL DEFAULT NOW(),
   updated_at timestamp NOT NULL DEFAULT NOW(),
-  user_snapshot jsonb
 );

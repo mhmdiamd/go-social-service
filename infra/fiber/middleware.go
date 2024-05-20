@@ -12,68 +12,67 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/mhmdiamd/go-social-service/external/jwt"
-	infrafiber "github.com/mhmdiamd/go-social-service/infra/fiber"
 	"github.com/mhmdiamd/go-social-service/infra/response"
 	"github.com/mhmdiamd/go-social-service/internal/config"
 	infralog "github.com/mhmdiamd/go-social-service/internal/log"
 )
- 
+
 func LogTrace() fiber.Handler {
-  return func (c *fiber.Ctx) error {
-    ctx := c.UserContext()
+	return func(c *fiber.Ctx) error {
+		ctx := c.UserContext()
 
-    // Initiate Structure
-    now := time.Now()
-    traceId := uuid.New()
-    c.Set("X-Trace-ID", traceId.String())
+		// Initiate Structure
+		now := time.Now()
+		traceId := uuid.New()
+		c.Set("X-Trace-ID", traceId.String())
 
-    data := map[logger.LogKey]interface{}{
-      logger.TRACER_ID : traceId,
-      logger.METHOD: c.Route().Method,
-      logger.PATH: string(c.Context().URI().Path()),
-    }
+		data := map[logger.LogKey]interface{}{
+			logger.TRACER_ID: traceId,
+			logger.METHOD:    c.Route().Method,
+			logger.PATH:      string(c.Context().URI().Path()),
+		}
 
-    ctx = context.WithValue(ctx, logger.DATA, data)
+		ctx = context.WithValue(ctx, logger.DATA, data)
 
-    // get Request
-    infralog.Log.Infof(ctx, "incoming request")
+		// get Request
+		infralog.Log.Infof(ctx, "incoming request")
 
-    c.SetUserContext(ctx)
-    err := c.Next()
+		c.SetUserContext(ctx)
+		err := c.Next()
 
-    // Finish request
-    data[logger.RESPONSE_TIME] = time.Since(now).Milliseconds()
-    data[logger.RESPONSE_TYPE] = "ms"
+		// Finish request
+		data[logger.RESPONSE_TIME] = time.Since(now).Milliseconds()
+		data[logger.RESPONSE_TYPE] = "ms"
 
-    httpStatusCode := c.Response().Header.StatusCode()
-    if httpStatusCode >= 200 && httpStatusCode <= 299 {
-      ctx = context.WithValue(ctx, logger.DATA, data)
-      infralog.Log.Infof(ctx, "success")
-    }else {
-      respBody := c.Response().Body()
-      data["response_body"] = fmt.Sprintf("%s", respBody)
+		httpStatusCode := c.Response().Header.StatusCode()
+		if httpStatusCode >= 200 && httpStatusCode <= 299 {
+			ctx = context.WithValue(ctx, logger.DATA, data)
+			infralog.Log.Infof(ctx, "success")
+		} else {
+			respBody := c.Response().Body()
+			data["response_body"] = fmt.Sprintf("%s", respBody)
 
-      ctx = context.WithValue(ctx, logger.DATA, data)
-      infralog.Log.Errorf(ctx, "error")
-    }
+			ctx = context.WithValue(ctx, logger.DATA, data)
+			infralog.Log.Errorf(ctx, "error")
+		}
 
-    return err
-  }
+		return err
+	}
 }
 
 func CheckIsAdmin() fiber.Handler {
-  return func(c *fiber.Ctx) error {
-    role := c.Locals("ROLE").(string)
+	return func(c *fiber.Ctx) error {
+		role := c.Locals("ROLE").(string)
 
-    if role != "admin" {
-      return infrafiber.NewResponse(
-        infrafiber.WithError(response.ErrorUnauthorized),
-        infrafiber.WithHttpCode(http.StatusUnauthorized),
-      ).Send(c)
-    }
+		if role != "admin" {
+			return NewResponse(
+				WithError(response.ErrorUnauthorized),
+				WithHttpCode(http.StatusUnauthorized),
+			).Send(c)
+		}
 
-    return nil
-  }
+		return nil
+	}
 }
 
 func CheckAuth() fiber.Handler {
