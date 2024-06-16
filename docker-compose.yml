@@ -1,0 +1,12 @@
+version: "4.30"
+
+services:
+  go-social-service:
+    container_name: "go-social-service"
+    image: postgres:alpine3.20
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_DB: db_social_service

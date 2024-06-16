@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/mhmdiamd/go-social-service/external/google"
@@ -24,7 +23,7 @@ type Repository interface {
 
 	GetAuthByEmail(ctx context.Context, email string) (model AuthEntity, err error)
 	CreateAuth(ctx context.Context, model AuthEntity) (err error)
-  DeleteOtpByEmail(ctx context.Context, email string) (err error)
+	DeleteOtpByEmail(ctx context.Context, email string) (err error)
 }
 
 type Service struct {
@@ -38,7 +37,6 @@ func NewService(repo Repository) Service {
 }
 
 func (s Service) Register(ctx context.Context, req RegisterRequestPayload) (err error) {
-
 	authEntity := NewAuthEntityFromRegister(req)
 
 	// Validation auth register payload
@@ -52,6 +50,8 @@ func (s Service) Register(ctx context.Context, req RegisterRequestPayload) (err 
 		if err == response.ErrNotFound {
 			err = response.ErrOtpInvalid
 		}
+
+		log.Log.Errorf(ctx, "[Register, GetDetailOtp] with error detail %s", err.Error())
 
 		return
 	}
@@ -90,6 +90,7 @@ func (s Service) login(ctx context.Context, req LoginRequestPayload) (token stri
 			err = response.ErrUnauthorized
 		}
 
+		log.Log.Errorf(ctx, "[Register, GetAuthByEmail] with error detail %s", err.Error())
 		return
 	}
 
@@ -104,7 +105,6 @@ func (s Service) login(ctx context.Context, req LoginRequestPayload) (token stri
 }
 
 func (s Service) SendOtp(ctx context.Context, req SendOtpRequestPayload) (err error) {
-
 	// Generate OTP
 	otp := helper.GenerateOTP()
 
@@ -114,16 +114,20 @@ func (s Service) SendOtp(ctx context.Context, req SendOtpRequestPayload) (err er
 	// Validating the payload
 	err = otpEntity.ValidateEmail()
 	if err != nil {
-    log.Log.Errorf(ctx, "[SendOtp, ValidateEmail] with error detail %v", err.Error())
+		log.Log.Errorf(ctx, "[SendOtp, ValidateEmail] with error detail %v", err.Error())
 		return
-  }
+	}
 
 	// Check is otp already exists or not, if yes then regenerate the otp itself
 	userOtps, err := s.Repo.GetOtpByEmail(ctx, req.Email)
+	if err != nil {
+		log.Log.Errorf(ctx, "[SendOtp, GetOtpByEmail] with error detail %s", err.Error())
+	}
 	maxSendEmail := 3
 
 	// Check is user to much send email
 	if len(userOtps) >= maxSendEmail {
+		log.Log.Errorf(ctx, "[SendOtp, MaxSendEmail] with error detail %s", response.ErrToMuchSendEmail)
 		return response.ErrToMuchSendEmail
 	}
 
@@ -151,12 +155,14 @@ func (s Service) SendOtp(ctx context.Context, req SendOtpRequestPayload) (err er
 	// Deactivated existing OTP
 	err = s.Repo.UnactiveOtp(ctx, req.Email)
 	if err != nil {
+		log.Log.Errorf(ctx, "[SendOtp, UnactiveOtp] with error detail %s", err.Error())
 		return
 	}
 
 	// Create user otp
 	err = s.Repo.CreateOTP(ctx, otpEntity)
 	if err != nil {
+		log.Log.Errorf(ctx, "[SendOtp, CreateOtp] with error detail %s", err.Error())
 		return
 	}
 
@@ -164,7 +170,6 @@ func (s Service) SendOtp(ctx context.Context, req SendOtpRequestPayload) (err er
 }
 
 func (s Service) VerifyOtp(ctx context.Context, req VerifyOtpRequestPayload) (otp_id string, err error) {
-
 	otpEntity := NewOtpEntity(req.Otp, req.Email)
 
 	if err = otpEntity.Validate(); err != nil {
@@ -175,6 +180,7 @@ func (s Service) VerifyOtp(ctx context.Context, req VerifyOtpRequestPayload) (ot
 	if err != nil {
 		if err == response.ErrNotFound {
 			err = response.ErrOtpInvalid
+			log.Log.Errorf(ctx, "[VerifyOtp, GetDetailOtpByEmailAndOtp] with error detail %s", err.Error())
 			return
 		}
 	}
@@ -190,7 +196,7 @@ func (s Service) VerifyOtp(ctx context.Context, req VerifyOtpRequestPayload) (ot
 func (s Service) DeleteAuth(ctx context.Context, email string) (err error) {
 	err = s.Repo.DeleteAuthByEmail(ctx, email)
 	if err != nil {
-    fmt.Println(err)
+		log.Log.Errorf(ctx, "[DeleteAuth, DeleteAuthByEmail] with error detail %s", err.Error())
 		return
 	}
 

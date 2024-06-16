@@ -6,5 +6,5 @@ CREATE TABLE event_commite (
   event_public_id varchar(100) NOT NULL,         
   position EVENT_POSITION NOT NULL,
   created_at timestamp NOT NULL DEFAULT NOW(),
-  updated_at timestamp NOT NULL DEFAULT NOW(),
+  updated_at timestamp NOT NULL DEFAULT NOW()
 );

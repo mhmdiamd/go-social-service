@@ -15,7 +15,6 @@ var svc *GoogleDrive
 func init() {
 	filename := "../../cmd/api/config.yaml"
 	err := config.LoadConfig(filename)
-
 	if err != nil {
 		panic(err)
 	}
@@ -36,7 +35,6 @@ func Test_GoogleDriveConnect_Success(t *testing.T) {
 
 func Test_GoogleDriveUpload(t *testing.T) {
 	t.Run("fail, image oversize", func(t *testing.T) {
-
 	})
 
 	t.Run("fail, image type not compatible", func(t *testing.T) {

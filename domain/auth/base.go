@@ -11,7 +11,7 @@ func Init(router fiber.Router, db *sqlx.DB) {
 	handler := newHandler(svc)
 
 	authRoute := router.Group("auth")
-	{
+  {
 		authRoute.Post("send-otp", handler.SendOtp)
 		authRoute.Post("verify-otp", handler.VerifyOtp)
 		authRoute.Post("register", handler.Register)

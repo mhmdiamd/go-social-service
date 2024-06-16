@@ -6,26 +6,27 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/mhmdiamd/go-social-service/internal/config"
 
-  _ "github.com/lib/pq"
+	_ "github.com/lib/pq"
 )
 
 func ConnectPostgres(cfg config.DBConfig) (db *sqlx.DB, err error) {
-  dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", 
-      cfg.Host,
-      cfg.Port,
-      cfg.User,
-      cfg.Password,
-      cfg.Name,
-  )
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 
-  db, err = sqlx.Open("postgres", dsn)
-  if err != nil {
-    return
-  }
+		cfg.User,
+		cfg.Password,
+		cfg.Host,
+		cfg.Port,
+		cfg.Name,
+	)
 
-  if err = db.Ping(); err != nil {
-    return
-  }
+	db, err = sqlx.Open("postgres", dsn)
+	if err != nil {
+		return
+	}
 
-  return 
+	if err = db.Ping(); err != nil {
+		return
+	}
+
+	return
 }

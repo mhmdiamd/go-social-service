@@ -84,7 +84,7 @@ func (h handler) VerifyOtp(ctx *fiber.Ctx) error {
 
 func (h handler) Register(ctx *fiber.Ctx) error {
 	//  Assign payload
-	var req = RegisterRequestPayload{}
+	req := RegisterRequestPayload{}
 
 	//  Body parsing
 	if err := ctx.BodyParser(&req); err != nil {
@@ -120,7 +120,7 @@ func (h handler) Register(ctx *fiber.Ctx) error {
 }
 
 func (h handler) login(ctx *fiber.Ctx) error {
-	var req = LoginRequestPayload{}
+	req := LoginRequestPayload{}
 
 	// Parsing body
 	if err := ctx.BodyParser(&req); err != nil {
