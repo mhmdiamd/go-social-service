@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "app"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["golang-server:4000"] # by default prometheus will append /metrics in the on of target host
+
+  - job_name: "prometheus"
+    scrape_interval: 1m
+    static_configs:
+      - targets: ["localhost:9090"]

@@ -57,9 +57,7 @@ func (h handler) GetAll(ctx *fiber.Ctx) error {
 }
 
 func (h handler) GetById(ctx *fiber.Ctx) error {
-
 	communityId, err := ctx.ParamsInt("id")
-
 	if err != nil {
 
 		fmt.Println(err)
@@ -95,7 +93,6 @@ func (h handler) GetById(ctx *fiber.Ctx) error {
 }
 
 func (h handler) Create(ctx *fiber.Ctx) error {
-
 	parsedId := uuid.MustParse(ctx.Locals("PUBLIC_ID").(string))
 
 	newCommunity := CreateCommunityRequestPayload{
@@ -111,6 +108,8 @@ func (h handler) Create(ctx *fiber.Ctx) error {
 
 	err := h.svc.CreateCommunity(ctx.UserContext(), newCommunity)
 	if err != nil {
+
+		fmt.Println(err)
 		myErr, ok := response.ErrorMapping[err.Error()]
 
 		if !ok {
@@ -130,7 +129,6 @@ func (h handler) Create(ctx *fiber.Ctx) error {
 }
 
 func (h handler) UpdateById(ctx *fiber.Ctx) error {
-
 	id, _ := ctx.ParamsInt("id")
 
 	file, _ := ctx.FormFile("photo")
@@ -172,9 +170,7 @@ func (h handler) UpdateById(ctx *fiber.Ctx) error {
 }
 
 func (h handler) DeleteById(ctx *fiber.Ctx) error {
-
 	communityId, err := ctx.ParamsInt("id")
-
 	if err != nil {
 		return infrafiber.NewResponse(
 			infrafiber.WithMessage("id not valid"),

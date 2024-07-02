@@ -39,17 +39,19 @@ type CommunityMemberRepository interface {
 type Service struct {
 	Repo          Repository
 	GoogleService *google.GoogleDrive
+	KafkaEvent    *KafkaEventCommunity
 }
 
 func NewService(repo Repository, gs *google.GoogleDrive) Service {
+	kafkaEvent := NewKafkaEventCommunity()
 	return Service{
 		Repo:          repo,
 		GoogleService: gs,
+		KafkaEvent:    kafkaEvent,
 	}
 }
 
 func (s Service) CreateCommunity(ctx context.Context, req CreateCommunityRequestPayload) (err error) {
-
 	communityEntity := NewCommunityFromCreate(req)
 
 	// Validation payload first
@@ -78,12 +80,16 @@ func (s Service) CreateCommunity(ctx context.Context, req CreateCommunityRequest
 	reqCommunityMember := CreateCommunityMembersRequestPayload{
 		CommunityId:  communityId,
 		UserPublicId: req.UserPublicId,
-    IsActive: 1,
+		IsActive:     1,
 		Role:         CommunityMemberRole_owner,
 	}
 
 	communityMemberEntity := NewCommunityMembersFromCreate(reqCommunityMember)
-	if err = s.Repo.CreateCommunityMember(ctx, communityMemberEntity); err != nil {
+	// if err = s.Repo.CreateCommunityMember(ctx, communityMemberEntity); err != nil {
+	// 	return
+	// }
+
+	if err = s.KafkaEvent.PublishCreateCommunity(ctx, communityMemberEntity, "create-community"); err != nil {
 		return
 	}
 
@@ -96,7 +102,6 @@ func (s Service) CreateCommunity(ctx context.Context, req CreateCommunityRequest
 }
 
 func (s Service) UpdateById(ctx context.Context, publicUserId uuid.UUID, req UpdateCommunityRequestPayload) (err error) {
-
 	entity := NewCommunityFromUpdate(req)
 
 	// validation check
@@ -150,7 +155,6 @@ func (s Service) UpdateById(ctx context.Context, publicUserId uuid.UUID, req Upd
 }
 
 func (s Service) DeleteById(ctx context.Context, id int) (err error) {
-
 	// Check the entity first
 	_, err = s.GetById(ctx, id)
 	if err != nil {

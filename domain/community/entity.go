@@ -30,6 +30,7 @@ func NewCommunityFromCreate(req CreateCommunityRequestPayload) Community {
 		Name:                req.Name,
 		Logo:                "default.jpg",
 		CategoryCommunityID: req.CategoryCommunityID,
+		FileIdGdrive:        "",
 		CreatedAt:           time.Now(),
 		UpdatedAt:           time.Now(),
 	}
@@ -49,10 +50,6 @@ func NewCommunityFromUpdate(req UpdateCommunityRequestPayload) Community {
 		CategoryCommunityID: req.CategoryCommunityID,
 	}
 
-	// if len(req.ExternalCategories) > 0 {
-	//   entity.ConvertExternalCategoriesToString(req.ExternalCategories)
-	// }
-
 	if req.Logo == nil {
 		entity.Logo = "https://drive.google.com/uc?id=default.jpg"
 	}
@@ -70,7 +67,6 @@ func NewCommunityPaginationFromListCommunityRequest(req ListCommunityRequestPayl
 }
 
 func (c Community) Validate() (err error) {
-
 	if err = c.ValidateName(); err != nil {
 		return
 	}
@@ -83,7 +79,6 @@ func (c Community) Validate() (err error) {
 }
 
 func (c Community) ValidateName() (err error) {
-
 	if c.Name == "" {
 		return response.ErrNameRequired
 	}
@@ -93,7 +88,7 @@ func (c Community) ValidateName() (err error) {
 
 func (c Community) ValidateCategory() (err error) {
 	if c.CategoryCommunityID == 0 {
-		if len(strings.Split(c.ExternalCategories, ",")) <= 1  && strings.Split(c.ExternalCategories, ",")[0] == ""  {
+		if len(strings.Split(c.ExternalCategories, ",")) <= 1 && strings.Split(c.ExternalCategories, ",")[0] == "" {
 			return response.ErrCommunityCategoryIdRequired
 		}
 	}

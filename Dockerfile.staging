@@ -1,0 +1,14 @@
+FROM golang:1.22
+
+WORKDIR /go/src/app
+
+RUN go mod download
+
+EXPOSE 4000
+
+# Migrate database
+CMD ["migrate -database postgres://postgres:password@db:5432/db_social_service -path external/database/migrations up"]
+
+# Running app
+CMD ["go", "run", "./go/src/app/cmd/api/main.go"]
+

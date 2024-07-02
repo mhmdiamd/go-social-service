@@ -14,8 +14,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var svc service
-var currentId string
+var (
+	svc       service
+	currentId string
+)
 
 func init() {
 	filename := "../../cmd/api/config.yaml"
@@ -32,7 +34,6 @@ func init() {
 
 	repo := NewRepository(db)
 	svc = NewService(repo)
-
 }
 
 func Test_CreateEvent(t *testing.T) {
@@ -42,7 +43,7 @@ func Test_CreateEvent(t *testing.T) {
 		Err     error
 	}
 
-  currentId = uuid.NewString()
+	currentId = uuid.NewString()
 
 	dataMock := map[string]mock{
 		"create new event": {
@@ -86,7 +87,6 @@ func Test_CreateEvent(t *testing.T) {
 }
 
 func Test_UpdateEventById(t *testing.T) {
-
 	type mock struct {
 		Status  string
 		Payload UpdateEventRequestPayload
@@ -97,7 +97,7 @@ func Test_UpdateEventById(t *testing.T) {
 		"update new event": {
 			Status: "success",
 			Payload: UpdateEventRequestPayload{
-        PublicId : tempdata.TempCurrentEventPublicId,
+				PublicId:            tempdata.TempCurrentEventPublicId,
 				EventDemographicsId: 19,
 				Name:                "Tes event 1",
 				Thumbnail:           "default.jpg",
@@ -110,8 +110,8 @@ func Test_UpdateEventById(t *testing.T) {
 		"update new event with different event demographics": {
 			Status: "success",
 			Payload: UpdateEventRequestPayload{
-        PublicId : tempdata.TempCurrentEventPublicId,
-        EventDemographicsId: 52,
+				PublicId:            tempdata.TempCurrentEventPublicId,
+				EventDemographicsId: 52,
 				Name:                "Tes event 1",
 				Thumbnail:           "default.jpg",
 				StartDate:           time.Now(),
@@ -123,10 +123,10 @@ func Test_UpdateEventById(t *testing.T) {
 		"name id is required": {
 			Status: "fail",
 			Payload: UpdateEventRequestPayload{
-        PublicId : currentId,
-				Thumbnail:           "default.jpg",
-				StartDate:           time.Now(),
-				EndDate:             time.Now(),
+				PublicId:  currentId,
+				Thumbnail: "default.jpg",
+				StartDate: time.Now(),
+				EndDate:   time.Now(),
 			},
 			Err: response.ErrNameRequired,
 		},
@@ -146,44 +146,41 @@ func Test_UpdateEventById(t *testing.T) {
 	}
 }
 
-
 func Test_GetListWithPaginationEvent(t *testing.T) {
-  t.Run("success, get list with pagination", func(t *testing.T) {
-    req := ListEventRequestPayload {
-      Size: 20,
-      Cursor: 30,
-    } 
+	t.Run("success, get list with pagination", func(t *testing.T) {
+		req := ListEventRequestPayload{
+			Size:   20,
+			Cursor: 30,
+		}
 
-    events, err := svc.GetAllWithPagination(context.Background(), req)
-    require.Nil(t, err)
-    require.NotNil(t, events)
-  })
+		events, err := svc.GetAllWithPagination(context.Background(), req)
+		require.Nil(t, err)
+		require.NotNil(t, events)
+	})
 }
 
 func Test_GetDetailEventById(t *testing.T) {
-  t.Run("success, get detail by id", func(t *testing.T) {
-    event, err := svc.GetDetailById(context.Background(), tempdata.TempCurrentEventPublicId)
-    require.NotNil(t, event)
-    require.Nil(t, err)
-  })
+	t.Run("success, get detail by id", func(t *testing.T) {
+		event, err := svc.GetDetailById(context.Background(), tempdata.TempCurrentEventPublicId)
+		require.NotNil(t, event)
+		require.Nil(t, err)
+	})
 
-  t.Run("fail, event not found", func(t *testing.T) {
-    _, err := svc.GetDetailById(context.Background(), uuid.NewString())
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrNotFound, err)
-  })
+	t.Run("fail, event not found", func(t *testing.T) {
+		_, err := svc.GetDetailById(context.Background(), uuid.NewString())
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrNotFound, err)
+	})
 }
 
 func Test_DeleteById(t *testing.T) {
-  t.Run("success, delete by id", func(t *testing.T) {
-    err := svc.DeleteById(context.Background(), tempdata.TempCurrentEventPublicId)
-    require.Nil(t, err)
-  })
+	t.Run("success, delete by id", func(t *testing.T) {
+		err := svc.DeleteById(context.Background(), tempdata.TempCurrentEventPublicId)
+		require.Nil(t, err)
+	})
 
-  t.Run("fail, id not found", func(t *testing.T) {
-    err := svc.DeleteById(context.Background(), tempdata.TempCurrentEventPublicId)
-    require.NotNil(t, err)
-  })
+	t.Run("fail, id not found", func(t *testing.T) {
+		err := svc.DeleteById(context.Background(), tempdata.TempCurrentEventPublicId)
+		require.NotNil(t, err)
+	})
 }
-
-

@@ -1,5 +1,6 @@
 external/database/postgres.sql
 cmd/api/config.yaml
+cmd/api/config-staging.yaml
 
 external/google/oauth-account.json
 external/google/service-account.json

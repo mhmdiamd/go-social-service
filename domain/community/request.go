@@ -24,9 +24,10 @@ type UpdateCommunityRequestPayload struct {
 
 type CreateCommunityMembersRequestPayload struct {
 	Nik      string              `json:"nik"`
-	PhotoKTP string                `json:"photo_ktp"`
-	Role      CommunityMemberRole  `json:"role"`
-	IsActive int `json:"is_active"`
+	PhotoKTP string              `json:"photo_ktp"`
+	Role     CommunityMemberRole `json:"role"`
+	IsActive int                 `json:"is_active"`
+
 	// user public id foreign key
 	UserPublicId uuid.UUID `json:"user_public_id"`
 	// Community Id
@@ -39,7 +40,6 @@ type ListCommunityRequestPayload struct {
 }
 
 func (l ListCommunityRequestPayload) GenerateDefaultValue() ListCommunityRequestPayload {
-
 	if l.Cursor < 0 {
 		l.Cursor = 1
 	}
