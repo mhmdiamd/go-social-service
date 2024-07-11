@@ -17,7 +17,7 @@ func Init(router fiber.Router, db *sqlx.DB) {
 	reader := NewEventReaderCommunityMember("community", svc)
 
 	go func() {
-		if err := reader.ReadCreateCommunity(context.Background(), "create-community"); err != nil {
+		if err := reader.ReadCreateCommunity(context.Background(), "create-community", svc.AddMember); err != nil {
 			log.Printf("error reading from Kafka: %v", err)
 		}
 	}()

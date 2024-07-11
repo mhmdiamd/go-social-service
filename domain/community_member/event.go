@@ -10,7 +10,7 @@ import (
 )
 
 type EventReaderCommunityMember interface {
-	ReadCreateCommunity(ctx context.Context, topic string) error
+	ReadCreateCommunity(ctx context.Context, topic string, handler func(ctx context.Context, cm AddCommunityMemberRequestPayload) error) error
 }
 
 type KafkaEventReaderCommunityMember struct {
@@ -34,7 +34,7 @@ func NewEventReaderCommunityMember(groupID string, svc service) EventReaderCommu
 	}
 }
 
-func (kc *KafkaEventReaderCommunityMember) ReadCreateCommunity(ctx context.Context, topic string) error {
+func (kc *KafkaEventReaderCommunityMember) ReadCreateCommunity(ctx context.Context, topic string, handler func(ctx context.Context, cm AddCommunityMemberRequestPayload) error) error {
 	// encode data community to json first for sending as topic to kafka
 	config := NewKafkaConfig(kc.groupID, topic)
 	reader := kafka.NewReader(config)
@@ -58,7 +58,7 @@ func (kc *KafkaEventReaderCommunityMember) ReadCreateCommunity(ctx context.Conte
 		UserPublicId: cm.UserPublicId.String(),
 	}
 
-	if err := kc.svc.AddMember(ctx, req); err != nil {
+	if err := handler(ctx, req); err != nil {
 		return err
 	}
 
