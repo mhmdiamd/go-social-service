@@ -1,0 +1,37 @@
+app:
+  name: go-social-service
+  port: ":4000"
+  encryption:
+    salt: 10
+    jwt_secret: jwtexamplesecret
+  external:
+    google:
+      smtp_sender_email: milham0145@gmail.com
+      smtp_password: crct wmfb wplj swfo
+      smtp_sender_name: Social Service Admin
+      drive:
+        "type": "service_account"
+        "project_id": "social-service-416707"
+        "private_key_id": "0479b37451f88fc153957151ffc297853fe7e88b"
+        "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDbrN545cyr6cFC\nUCCzWVeNBsmME4a9T7dd5VHUdYdUpQuMp6+OvGdHidU4ki7L9CgotUmRq2Io8W3m\nyIgCzoHgUvD9CSryp/XbojBe3+8jpYOSLpPv6sL5Ng0C6iQBdGtSGdeotldjk+Af\nM+CUy3zO8kkybvgBOMxW62P0r+u+EdbjT6p44Q8pNDUXPWzrcL6SBvc6GHJZ5ovn\nnczI/sVcwvIcMEeAhDsV9x9qG6EvTGCDvkjBbtXd5ciGg3JCJyrOtf3qRRyU2Ajt\nP3EJP8l2AWB5LeSeooQ+ifAQWpU7MtQT+JbxsYaQGDDxGJYv0mdOC9MeHmyFdbDB\nX1XBwetTAgMBAAECggEAEP2s83Lqwr1Aym1CKj0VzX2h5yi3ejsJNsT+8Ezq27ws\nSYPKy2J9JoZdrJN59SJ8XLGw8AhufjY2RuxpwLXSS9R+eUPVQ5GELam8zgnKCFrL\n82mQ3bStwfLRTNFpWYd0qZQAHzeDSNtuMVuk2j1m+Oa6jKESo52OCIcKYymcNUYt\nPftNDvBwHGSRIsa6B+Go0RxY4we+WPX4oxr58RGoFXxnavC7XrNJwqVsRgF9/GFu\nF9lC9JnvDoYSr1Ae4RobUKvD/3PDt+n7dYmOyE+0JwJ0oAIRbQfF30n+xX03lkTP\ngqk3sCCbCPme9k2IIjRtl/mplqQT+yZxuwElHhQkEQKBgQD3e0vQ1iXwvZdCxTaE\nulABF7z4JR7hsoBA34HDTLtHT3TE2YuVu/F/6R+pGL43IOOqyCQ/sH5Q30w2S+GC\niONuBYFjzjyM+Npct+Qo66MeHmhD4rajQrlBFZWbGFu4ivPKhKZc8rnqNa7HBS3H\nMjsZw2Gz2bM/DhN3VpO2Sz22uwKBgQDjPI4TMnAErB8q0OXJZ6Lm2e79cl+pxNOn\nC1x6AQGHFbb5utVDPs7OeHxowuhZPsUbR8fAJYzk7V8t3CazAf1dmVMScoG1janE\nrRk1IhULkKLGtYpsr4jBg/e2akjYXwRqGQ6I6jIVyKB3G1CM2EqZU42CSdbehL7a\nWQZNIbVwSQKBgQCRWK5sVnkt7ItbwauFRE8cdS6cpmB+uXEtqJbzdqs+9GFmA0ZB\niIILV4UqsMd2ZTCQ6r6vUR6+rIZ8FRC6s16vDTiyvzs8qCLG9ZFgnxPL6pvd0tbl\nB5j5qo2U6zdjKOiJdmKmkD+0WBbv+BCsvsmLFf7Zu+/UBpZULlrOY145ZQKBgBzp\nDWJf3mSZyXVXEoUnTFB2lbNlI8qjohH0nhVfn2QiXR80qAFgMkuOhLWHZqxEEivA\nXCeUH3LYyG07PykzLZsE8M6+BsakeV7ubvCVn3vTMQJ7AluFka6dLZzltNLic9tT\nyMeelDS1S8Ubkon40rTjLnPPFSlGVknNXcHecgkRAoGAd+sQ0q8iSAuluUg+Ch5J\nIiZ0FVed3cLdZmPLUCoqRmZWQ1ql6XTf9WymMFIppL51Bt7kXfHE4c5GN/Fd3G2U\nizjVKP6y0dMBjlBkqXfklhvBwYvb2gkwJiFPTuu92UiNYk74FN9YN9tgRtcrhsjG\nNnLTFjuMd2KJQOd0uEU3pjQ=\n-----END PRIVATE KEY-----\n"
+        "client_email": "social-service@social-service-416707.iam.gserviceaccount.com"
+        "client_id": "111649176369639942883"
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth"
+        "token_uri": "https://oauth2.googleapis.com/token"
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
+        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/social-service%40social-service-416707.iam.gserviceaccount.com"
+        "universe_domain": "googleapis.com"
+kafka:
+  host: localhost
+  port: 9092
+db:
+  host: localhost
+  port: 5432
+  name: db_social_service
+  user: postgres
+  password: password
+  connection_pool:
+    max_idle_connection: 10
+    max_open_connection: 30
+    max_lifetime_connection: 60 #second
+    max_idletime_connection: 60 #second

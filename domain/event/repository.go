@@ -12,7 +12,7 @@ type repository struct {
 	Db *sqlx.DB
 }
 
-func NewRepository(db *sqlx.DB) repository {
+func newRepository(db *sqlx.DB) repository {
 	return repository{
 		Db: db,
 	}
@@ -53,7 +53,6 @@ func (r repository) Create(ctx context.Context, tx *sqlx.Tx, event Event) (err e
 }
 
 func (r repository) UpdateById(ctx context.Context, tx *sqlx.Tx, event Event) (err error) {
-
 	query := `
     UPDATE events 
     SET name=:name, description=:description, address=:address, thumbnail=:thumbnail, event_demographics_id=:event_demographics_id, event_demographics_snapshot=:event_demographics_snapshot, start_at=:start_at, end_at=:end_at
@@ -76,7 +75,6 @@ func (r repository) UpdateById(ctx context.Context, tx *sqlx.Tx, event Event) (e
 }
 
 func (r repository) DeleteById(ctx context.Context, public_id string) (err error) {
-
 	query := `DELETE FROM events WHERE public_id=$1`
 	_, err = r.Db.QueryContext(ctx, query, public_id)
 	if err != nil {
@@ -87,7 +85,6 @@ func (r repository) DeleteById(ctx context.Context, public_id string) (err error
 }
 
 func (r repository) GetDetailById(ctx context.Context, public_id string) (event Event, err error) {
-
 	query := `
     SELECT
       e.public_id AS "public_id", 
@@ -121,7 +118,6 @@ func (r repository) GetDetailById(ctx context.Context, public_id string) (event 
 }
 
 func (r repository) GetAllWithPagination(ctx context.Context, pagination ListEventRequestPayload) (events []Event, err error) {
-
 	query := `
     SELECT 
       e.public_id AS "public_id", 
@@ -155,26 +151,24 @@ func (r repository) GetAllWithPagination(ctx context.Context, pagination ListEve
 }
 
 func (r repository) GetEventDemographicsById(ctx context.Context, eventDemographicsId int) (ed EventDemographics, err error) {
-
-  query := `
+	query := `
     SELECT 
       id, name, gender, graduation, start_age, end_age
     FROM event_demographics
     WHERE id=$1
   `
 
-  err = r.Db.GetContext(ctx, &ed, query, eventDemographicsId)
-  if err != nil {
-    if err == sql.ErrNoRows {
-      err = response.ErrNotFound
-    }
-  }
+	err = r.Db.GetContext(ctx, &ed, query, eventDemographicsId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = response.ErrNotFound
+		}
+	}
 
-  return
+	return
 }
 
 func (r repository) CreateEventCommite(ctx context.Context, tx *sqlx.Tx, ec EventCommite) (err error) {
-
 	query := `
     INSERT INTO event_commite (
       user_public_id, event_public_id, position, created_at, updated_at

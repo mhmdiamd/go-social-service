@@ -9,6 +9,11 @@ import (
 	tempdata "github.com/mhmdiamd/go-social-service/temp_data"
 )
 
+type EventPublisherCommunity interface {
+	PublishCreateCommunity(ctx context.Context, cm CommunityMember, topic string) error
+	PublishDeleteCommunityById(ctx context.Context, communityId int, topic string) error
+}
+
 type Repository interface {
 	CommunityRepository
 	CommunityMemberRepository
@@ -32,22 +37,20 @@ type CommunityRepository interface {
 
 type CommunityMemberRepository interface {
 	GetAllByUserPublicId(ctx context.Context, publicId string) (communities []Community, err error)
-	DeleteCommunityMemberByIdCommunity(ctx context.Context, communityId int) (err error)
-	CreateCommunityMember(ctx context.Context, entity CommunityMember) (err error)
 }
 
 type Service struct {
-	Repo          Repository
-	GoogleService *google.GoogleDrive
-	KafkaEvent    *KafkaEventCommunity
+	Repo           Repository
+	GoogleService  *google.GoogleDrive
+	KafkaPublisher EventPublisherCommunity
 }
 
 func NewService(repo Repository, gs *google.GoogleDrive) Service {
-	kafkaEvent := NewKafkaEventCommunity()
+	kafkaPublisher := NewKafkaEventPublisherCommunity()
 	return Service{
-		Repo:          repo,
-		GoogleService: gs,
-		KafkaEvent:    kafkaEvent,
+		Repo:           repo,
+		GoogleService:  gs,
+		KafkaPublisher: kafkaPublisher,
 	}
 }
 
@@ -89,7 +92,7 @@ func (s Service) CreateCommunity(ctx context.Context, req CreateCommunityRequest
 	// 	return
 	// }
 
-	if err = s.KafkaEvent.PublishCreateCommunity(ctx, communityMemberEntity, "create-community"); err != nil {
+	if err = s.KafkaPublisher.PublishCreateCommunity(ctx, communityMemberEntity, "create-community"); err != nil {
 		return
 	}
 
@@ -176,10 +179,11 @@ func (s Service) DeleteById(ctx context.Context, id int) (err error) {
 	}
 
 	// Delete Community Member By Community Id
-	err = s.Repo.DeleteCommunityMemberByIdCommunity(ctx, id)
-	if err != nil {
-		return
-	}
+	// err = s.Repo.DeleteCommunityMemberByIdCommunity(ctx, id)
+	// if err != nil {
+	// 	return
+	// }
+	err = s.KafkaPublisher.PublishDeleteCommunityById(ctx, id, DELETE_COMMUNITY_BY_ID)
 
 	if err = tx.Commit(); err != nil {
 		return

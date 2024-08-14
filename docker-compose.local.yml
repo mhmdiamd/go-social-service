@@ -5,22 +5,9 @@ networks:
     driver: bridge
   monitoring:
     driver: bridge
-  kong-net:
+  broker:
     driver: bridge
 services:
-  golang-server:
-    build: .
-    ports:
-      - 4000:4000
-    environment:
-      APP_ENV: staging
-    depends_on:
-      - db
-    networks:
-      - base
-
-  # Running local
-  # docker exec -it go-social-service psql -U postgres
   db:
     image: postgres:alpine3.20
     environment:
@@ -33,6 +20,40 @@ services:
       - "5432:5432"
     networks:
       - base
+
+  zookeeper:
+    image: docker.io/bitnami/zookeeper:3.9
+    ports:
+      - "2181:2181"
+    volumes:
+      - "zookeeper_data:/bitnami"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - broker
+
+  kafka:
+    image: "bitnami/kafka:3.3.2"
+    ports:
+      - "9092:9092"
+    networks:
+      - base
+      - broker
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_ZOOKEEPER_METADATA_MIGRATION_ENABLE=true
+    volumes:
+      - "kafka_data:/bitnami"
+    depends_on:
+      - zookeeper
 
   grafana:
     container_name: go-social-service-grafana
@@ -62,25 +83,9 @@ services:
       - base
     command:
       - "--config.file=/etc/prometheus/prometheus/prometheus.yml"
-    depends_on:
-      - golang-server
 
-  kong:
-    image: kong:latest
-    environment:
-      KONG_DATABASE: "off"
-      KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml
-    ports:
-      - "8000:8000" # Public entrypoint
-      - "8443:8443" # Public entrypoint (SSL)
-      - "8001:8001" # Admin API
-      - "8444:8444" # Admin API (SSL)
-    volumes:
-      - ./kong.yml:/usr/local/kong/declarative/kong.yml
-    networks:
-      - kong-net
-      - base
 volumes:
   postgres_data:
+  zookeeper_data:
+  kafka_data:
   go_social_service_prometheus_data:
-  kong.yml:

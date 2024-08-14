@@ -32,8 +32,8 @@ func init() {
 		panic(err)
 	}
 
-	repo := NewRepository(db)
-	svc = NewService(repo)
+	repo := newRepository(db)
+	svc = newService(repo)
 }
 
 func Test_CreateEvent(t *testing.T) {

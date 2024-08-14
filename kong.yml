@@ -1,0 +1,11 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: go-social-service
+    url: http://golang-server:4000
+    routes:
+      - name: go-social-service-routes
+        paths:
+          - /
+        strip_path: true

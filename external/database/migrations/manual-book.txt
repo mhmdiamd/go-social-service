@@ -1,5 +1,9 @@
 *Database Migration Script
--> migrate -database postgres://postgres:postgres@localhost:5432/db_social_service -path external/database/migrations up/down
+-> migrate -database postgres://postgres:password@localhost:5432/db_social_service?sslmode=disable -path external/database/migrations up/down
+
+** When you are using docker
+migrate -path ./external/database/migrations -database "postgres://postgres:password@localhost:5432/db_social_service?sslmode=disable" up
+
 
 *Database Create Migration
 -> migrate create -ext sql -dir external/database/migrations migration-name

@@ -1,28 +1,30 @@
-# FROM golang:1.22 AS builder
-#
-# # Set working directory for the build stage
-# WORKDIR /go/src/app
-#
-# # Copy your Go source code (replace with your actual directory)
-# COPY . .
-#
-# # Install dependencies (Replace with your actual commands)
-# RUN go mod download
-#
-# # Build the go binary (Replace with your actual Build commands)
-# RUN go build -o main ./cmd/api
-#
-# EXPOSE 4000
-FROM golang:1.22
+# Use the official Golang image as the base image
+FROM golang:1.22-alpine
 
+# Set the working directory inside the container
 WORKDIR /go/src/app
 
-COPY . .
+# Copy go.mod and go.sum files to the working directory
+COPY go.mod .
+COPY go.sum .
 
-ENV APP_ENV=staging
-
+# Download all dependencies
 RUN go mod download
 
+# Copy the rest of the application source code to the working directory
+COPY . .
+
+# Build the Go application
+RUN go build -o go-social-service ./cmd/api/main.go
+
+# Expose the application port
 EXPOSE 4000
 
-CMD ["go", "run", "./cmd/api/main.go"]
+# Copy the entrypoint script to the container
+COPY entrypoint.sh /entrypoint.sh
+
+# Ensure the entrypoint script is executable
+RUN chmod +x /entrypoint.sh
+
+# Set the entrypoint script as the container's entry point
+ENTRYPOINT ["/entrypoint.sh"]

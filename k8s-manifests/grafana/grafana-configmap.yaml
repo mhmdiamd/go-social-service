@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-provisioning
+  namespace: default
+data:
+  datasources.yml: |
+    # Your datasources configuration goes here
+    # ...

@@ -14,6 +14,7 @@ type Config struct {
 
 type KafkaConfig struct {
 	Host string `yaml:"host"`
+	Port string `yaml:"port"`
 }
 
 type AppConfig struct {

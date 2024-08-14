@@ -10,7 +10,7 @@ import (
 
 type Repository interface {
 	EventRepository
-  EventDemographicsRepository
+	EventDemographicsRepository
 	EventCommiteRepository
 	EventTransactionRepository
 }
@@ -31,7 +31,7 @@ type EventRepository interface {
 }
 
 type EventDemographicsRepository interface {
-  GetEventDemographicsById(ctx context.Context, eventDemographicsId int) (ed EventDemographics, err error)
+	GetEventDemographicsById(ctx context.Context, eventDemographicsId int) (ed EventDemographics, err error)
 }
 
 type EventCommiteRepository interface {
@@ -42,7 +42,7 @@ type service struct {
 	repo Repository
 }
 
-func NewService(r Repository) service {
+func newService(r Repository) service {
 	return service{
 		repo: r,
 	}
@@ -53,7 +53,7 @@ func (s *service) GetAllWithPagination(ctx context.Context, req ListEventRequest
 
 	entities, err := s.repo.GetAllWithPagination(ctx, pagination)
 	if err != nil {
-    log.Log.Errorf(ctx, "[GetAllWithPagination, GetAllWithPagination] with error detail %s", err.Error())
+		log.Log.Errorf(ctx, "[GetAllWithPagination, GetAllWithPagination] with error detail %s", err.Error())
 		return
 	}
 
@@ -63,7 +63,7 @@ func (s *service) GetAllWithPagination(ctx context.Context, req ListEventRequest
 func (s *service) GetDetailById(ctx context.Context, event_public_id string) (event Event, err error) {
 	event, err = s.repo.GetDetailById(ctx, event_public_id)
 	if err != nil {
-    log.Log.Errorf(ctx, "[GetDetailById, GetDetailById] with error detail %s", err.Error())
+		log.Log.Errorf(ctx, "[GetDetailById, GetDetailById] with error detail %s", err.Error())
 		return
 	}
 
@@ -71,7 +71,6 @@ func (s *service) GetDetailById(ctx context.Context, event_public_id string) (ev
 }
 
 func (s *service) Create(ctx context.Context, req CreateEventRequestPayload) (err error) {
-
 	event := NewEventFromCreate(req)
 
 	if err = event.Validate(); err != nil {
@@ -79,25 +78,24 @@ func (s *service) Create(ctx context.Context, req CreateEventRequestPayload) (er
 	}
 
 	tx, err := s.repo.Begin(ctx)
-
 	if err != nil {
-    log.Log.Errorf(ctx, "[Create, Validate] with error detail %s", err.Error())
+		log.Log.Errorf(ctx, "[Create, Validate] with error detail %s", err.Error())
 		return
 	}
 
-  // Get event demographics firs
-  ed, err := s.repo.GetEventDemographicsById(ctx, event.EventDemographicsId)
-  if err != nil {
-    log.Log.Errorf(ctx, "[Create, GetEventDemographicsById] with error detail %s", err.Error())
-    return
-  }
+	// Get event demographics firs
+	ed, err := s.repo.GetEventDemographicsById(ctx, event.EventDemographicsId)
+	if err != nil {
+		log.Log.Errorf(ctx, "[Create, GetEventDemographicsById] with error detail %s", err.Error())
+		return
+	}
 
-  // set Into json
-  event.SetEventDemographicsJSON(ed)
+	// set Into json
+	event.SetEventDemographicsJSON(ed)
 
 	// Create Event First
 	if err = s.repo.Create(ctx, tx, event); err != nil {
-    log.Log.Errorf(ctx, "[Create, Create] with error detail %s", err.Error())
+		log.Log.Errorf(ctx, "[Create, Create] with error detail %s", err.Error())
 		return
 	}
 
@@ -107,16 +105,16 @@ func (s *service) Create(ctx context.Context, req CreateEventRequestPayload) (er
 		Position:      EventPosition_Admin,
 	}
 
-  newCommite := NewEventCommiteFromCreate(commite)
-  tempdata.TempCurrentEventPublicId = event.PublicId
+	newCommite := NewEventCommiteFromCreate(commite)
+	tempdata.TempCurrentEventPublicId = event.PublicId
 	// Create Event Commite admin
 	if err = s.repo.CreateEventCommite(ctx, tx, newCommite); err != nil {
-    log.Log.Errorf(ctx, "[Create, CreateEventCommite] with error detail %s", err.Error())
+		log.Log.Errorf(ctx, "[Create, CreateEventCommite] with error detail %s", err.Error())
 		return
 	}
 
 	if err = s.repo.Commit(ctx, tx); err != nil {
-    log.Log.Errorf(ctx, "[Create, Commit] with error detail %s", err.Error())
+		log.Log.Errorf(ctx, "[Create, Commit] with error detail %s", err.Error())
 		return
 	}
 
@@ -125,45 +123,44 @@ func (s *service) Create(ctx context.Context, req CreateEventRequestPayload) (er
 }
 
 func (s *service) UpdateById(ctx context.Context, req UpdateEventRequestPayload) (err error) {
+	newEvent := NewEventFromUpdate(req)
 
-	newEvent := NewEventFromUpdate(req) 
-
-  // Validation
-  if err = newEvent.Validate(); err != nil {
-    return
-  }
+	// Validation
+	if err = newEvent.Validate(); err != nil {
+		return
+	}
 
 	tx, err := s.repo.Begin(ctx)
 	if err != nil {
-    log.Log.Errorf(ctx, "[Update, Begin] with error detail %s", err.Error())
+		log.Log.Errorf(ctx, "[Update, Begin] with error detail %s", err.Error())
 		return
 	}
 
 	// make sure that event is exist
-  _, err = s.repo.GetDetailById(ctx, newEvent.PublicId)
+	_, err = s.repo.GetDetailById(ctx, newEvent.PublicId)
 	if err != nil {
-    log.Log.Errorf(ctx, "[Update, GetDetailById] with error detail %s", err.Error())
+		log.Log.Errorf(ctx, "[Update, GetDetailById] with error detail %s", err.Error())
 		return
 	}
 
-  ed, err := s.repo.GetEventDemographicsById(ctx, newEvent.EventDemographicsId)
-  if err != nil {
-    log.Log.Errorf(ctx, "[Update, GetEventDemographicsById] with error detail %s", err.Error())
-    return
-  }
+	ed, err := s.repo.GetEventDemographicsById(ctx, newEvent.EventDemographicsId)
+	if err != nil {
+		log.Log.Errorf(ctx, "[Update, GetEventDemographicsById] with error detail %s", err.Error())
+		return
+	}
 
-  // if event demographics has a different data, set new data as new event demographics
-  newEvent.SetEventDemographicsJSON(ed)
+	// if event demographics has a different data, set new data as new event demographics
+	newEvent.SetEventDemographicsJSON(ed)
 
 	// Update the event by event_id
 	if err = s.repo.UpdateById(ctx, tx, newEvent); err != nil {
-    log.Log.Errorf(ctx, "[Update, UpdateById] with error detail %s", err.Error())
+		log.Log.Errorf(ctx, "[Update, UpdateById] with error detail %s", err.Error())
 		return
 	}
 
 	// Commite the transactions
 	if err = s.repo.Commit(ctx, tx); err != nil {
-    log.Log.Errorf(ctx, "[Update, Commit] with error detail %s", err.Error())
+		log.Log.Errorf(ctx, "[Update, Commit] with error detail %s", err.Error())
 		return
 	}
 
@@ -172,17 +169,16 @@ func (s *service) UpdateById(ctx context.Context, req UpdateEventRequestPayload)
 }
 
 func (s *service) DeleteById(ctx context.Context, eventPublicId string) (err error) {
-
 	// Check is the event exist
 	_, err = s.repo.GetDetailById(ctx, eventPublicId)
 	if err != nil {
-    log.Log.Errorf(ctx, "[DeleteById, GetDetailById] with error detail %s", err.Error())
+		log.Log.Errorf(ctx, "[DeleteById, GetDetailById] with error detail %s", err.Error())
 		return
 	}
 
 	// Delete the Event
 	if err = s.repo.DeleteById(ctx, eventPublicId); err != nil {
-    log.Log.Errorf(ctx, "[DeleteById, DeleteById] with error detail %s", err.Error())
+		log.Log.Errorf(ctx, "[DeleteById, DeleteById] with error detail %s", err.Error())
 		return
 	}
 

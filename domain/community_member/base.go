@@ -2,7 +2,7 @@ package communitymember
 
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
@@ -13,12 +13,11 @@ func Init(router fiber.Router, db *sqlx.DB) {
 	repo := newRepository(db)
 	svc := newService(repo)
 	handler := newHandler(svc)
-
-	reader := NewEventReaderCommunityMember("community", svc)
+	kafkaReader := NewEventReaderCommunityMember("COMMUNITY", svc)
 
 	go func() {
-		if err := reader.ReadCreateCommunity(context.Background(), "create-community", svc.AddMember); err != nil {
-			log.Printf("error reading from Kafka: %v", err)
+		if err := kafkaReader.Init(context.Background()); err != nil {
+			fmt.Printf("error reading from kafka : %v", err)
 		}
 	}()
 

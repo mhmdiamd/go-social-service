@@ -97,17 +97,6 @@ func (r repository) DeleteById(ctx context.Context, id int) (err error) {
 	return
 }
 
-func (r repository) DeleteCommunityMemberByIdCommunity(ctx context.Context, communityId int) (err error) {
-	query := `DELETE FROM community_members WHERE community_id=$1`
-
-	_, err = r.Db.QueryContext(ctx, query, communityId)
-	if err != nil {
-		return
-	}
-
-	return
-}
-
 func (r repository) GetAll(ctx context.Context, communityPagination CommunityPagination) (communities []Community, err error) {
 	query := `
     SELECT 
@@ -179,30 +168,6 @@ func (r repository) GetAllCommunityMemberByIdCommunity(ctx context.Context, comm
 			return []CommunityMember{}, nil
 		}
 	}
-
-	return
-}
-
-func (r repository) CreateCommunityMember(ctx context.Context, entity CommunityMember) (err error) {
-	query := `
-    INSERT INTO community_members (
-      community_id, user_public_id, role, photoktp, nik, is_active
-    ) VALUES (
-      :community_id, :user_public_id, :role, :photoktp, :nik, :is_active
-    )
-  `
-
-	stmt, err := r.Db.PrepareNamedContext(ctx, query)
-	if err != nil {
-		return
-	}
-
-	_, err = stmt.ExecContext(ctx, entity)
-	if err != nil {
-		return
-	}
-
-	defer stmt.Close()
 
 	return
 }

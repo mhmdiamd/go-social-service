@@ -12,6 +12,7 @@ import (
 	categoryComunity "github.com/mhmdiamd/go-social-service/domain/category-community"
 	"github.com/mhmdiamd/go-social-service/domain/community"
 	communityMember "github.com/mhmdiamd/go-social-service/domain/community_member"
+	eventcommite "github.com/mhmdiamd/go-social-service/domain/event-commite"
 	eventDemographics "github.com/mhmdiamd/go-social-service/domain/event-demographics"
 	"github.com/mhmdiamd/go-social-service/external/database"
 	"github.com/mhmdiamd/go-social-service/internal/config"
@@ -54,7 +55,7 @@ func init() {
 }
 
 func main() {
-	filename := "./cmd/api/config.yaml"
+	filename := "./cmd/api/config-local.yaml"
 
 	if os.Getenv("APP_ENV") == "staging" {
 		filename = "./cmd/api/config-staging.yaml"
@@ -93,10 +94,10 @@ func main() {
 	})
 
 	router.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
-
 	auth.Init(router, db)
 	categoryComunity.Init(router, db)
 	eventDemographics.Init(router, db)
+	eventcommite.Init(router, db)
 	community.Init(router, db)
 	communityMember.Init(router, db)
 
