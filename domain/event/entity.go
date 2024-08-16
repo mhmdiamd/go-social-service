@@ -9,18 +9,18 @@ import (
 )
 
 type Event struct {
-	Id                int             `db:"-"`
-	PublicId          string          `db:"public_id" json:"public_id"`
-	Name              string          `db:"name" json:"name"`
-	Description       *string          `db:"description" json:"description"`
-	Address           *string          `db:"address" json:"address"`
-	Thumbnail         string          `db:"thumbnail" json:"thumbnail"`
+	Id                    int             `db:"-"`
+	PublicId              uuid.UUID       `db:"public_id" json:"public_id"`
+	Name                  string          `db:"name" json:"name"`
+	Description           *string         `db:"description" json:"description"`
+	Address               *string         `db:"address" json:"address"`
+	Thumbnail             string          `db:"thumbnail" json:"thumbnail"`
 	EventDemographicsJSON json.RawMessage `db:"event_demographics_snapshot" json:"event_demographics_snapshot"`
-	StartDate         time.Time       `db:"start_at" json:"start_at"`
-	EndDate           time.Time       `db:"end_at" json:"end_at"`
+	StartDate             time.Time       `db:"start_at" json:"start_at"`
+	EndDate               time.Time       `db:"end_at" json:"end_at"`
 
-	EventDemographicsId int `db:"event_demographics_id" json:"event_demographics_id"`
-	EventDemographics *EventDemographics `db:"event_demographics"`
+	EventDemographicsId int                `db:"event_demographics_id" json:"event_demographics_id"`
+	EventDemographics   *EventDemographics `db:"event_demographics"`
 
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
@@ -28,7 +28,7 @@ type Event struct {
 
 func NewEventFromCreate(req CreateEventRequestPayload) Event {
 	entity := Event{
-		PublicId:            uuid.NewString(),
+		PublicId:            uuid.New(),
 		EventDemographicsId: req.EventDemographicsId,
 		Name:                req.Name,
 		Thumbnail:           "default.jpg",
@@ -46,22 +46,21 @@ func NewEventFromCreate(req CreateEventRequestPayload) Event {
 }
 
 func NewEventFromUpdate(req UpdateEventRequestPayload) Event {
-	var event = Event{
-		PublicId:    req.PublicId,
-    EventDemographicsId : req.EventDemographicsId,
-		Description: req.Description,
-		Address:     req.Address,
-		Name:        req.Name,
-		Thumbnail:   req.Thumbnail,
-		StartDate:   req.StartDate,
-		EndDate:     req.EndDate,
+	event := Event{
+		PublicId:            req.PublicId,
+		EventDemographicsId: req.EventDemographicsId,
+		Description:         req.Description,
+		Address:             req.Address,
+		Name:                req.Name,
+		Thumbnail:           req.Thumbnail,
+		StartDate:           req.StartDate,
+		EndDate:             req.EndDate,
 	}
 
 	return event
 }
 
 func (e Event) Validate() (err error) {
-
 	if err = e.ValidateName(); err != nil {
 		return
 	}
@@ -82,7 +81,6 @@ func (e Event) ValidateName() (err error) {
 }
 
 func (e Event) ValidateDate() (err error) {
-
 	if e.StartDate.IsZero() {
 		return response.ErrStartDateRequired
 	}
@@ -99,31 +97,31 @@ func (e Event) ValidateDate() (err error) {
 }
 
 func (e Event) IsEventDemographicSame(newIdEventDemographic int) bool {
-  return e.EventDemographicsId == newIdEventDemographic
+	return e.EventDemographicsId == newIdEventDemographic
 }
 
 func (e *Event) SetEventDemographicsJSON(ed EventDemographics) (err error) {
-  edJson, err := json.Marshal(ed)
-  if err != nil {
-    return 
-  }
+	edJson, err := json.Marshal(ed)
+	if err != nil {
+		return
+	}
 
-  e.EventDemographicsJSON = edJson
+	e.EventDemographicsJSON = edJson
 
-  return
+	return
 }
 
 func (e *Event) ConvertToEventResponse() EventResponse {
 	return EventResponse{
-		Id:          e.Id,
-		PublicId:    e.PublicId,
-    EventDemographicsId: e.EventDemographicsId,
-		Name:        e.Name,
-		Description: e.Description,
-		Address:     e.Address,
-		Thumbnail:   e.Thumbnail,
-    EventDemographics: e.EventDemographics,
-		StartDate:   e.StartDate,
-		EndDate:     e.EndDate,
+		Id:                  e.Id,
+		PublicId:            e.PublicId,
+		EventDemographicsId: e.EventDemographicsId,
+		Name:                e.Name,
+		Description:         e.Description,
+		Address:             e.Address,
+		Thumbnail:           e.Thumbnail,
+		EventDemographics:   e.EventDemographics,
+		StartDate:           e.StartDate,
+		EndDate:             e.EndDate,
 	}
 }

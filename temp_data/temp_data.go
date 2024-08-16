@@ -1,11 +1,13 @@
 package tempdata
 
+import "github.com/google/uuid"
+
 var (
 	TempRegisterOtp      string
-	TempPublicIdUserOtp  string
-	TempLastUserPublicId string
+	TempPublicIdUserOtp  uuid.UUID
+	TempLastUserPublicId uuid.UUID
 	LastCommunityID      int
 
-  // Event
-  TempCurrentEventPublicId string
+	// Event
+	TempCurrentEventPublicId uuid.UUID
 )

@@ -9,20 +9,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_EventCommiteValidate(t *testing.T) {
+func Test_EventCommitteeValidate(t *testing.T) {
 
 	type mockPayload struct {
 		Status  string
-		Payload EventCommite
+		Payload EventCommittee
 		Err     error
 	}
 
 	testMock := map[string]mockPayload{
 		"validate user_public_id": {
 			Status: "success",
-			Payload: EventCommite{
-				UserPublicId:  uuid.NewString(),
-				EventPublicId: uuid.NewString(),
+			Payload: EventCommittee{
+				UserPublicId:  uuid.New(),
+				EventPublicId: uuid.New(),
 				Position:      EventPosition_Admin,
 			},
 			Err: nil,
@@ -30,8 +30,8 @@ func Test_EventCommiteValidate(t *testing.T) {
 
 		"user_public_id is required": {
 			Status: "fail",
-			Payload: EventCommite{
-				EventPublicId: uuid.NewString(),
+			Payload: EventCommittee{
+				EventPublicId: uuid.New(),
 				Position:      EventPosition_Admin,
 			},
 			Err: response.ErrUserPublicIdRequired,
@@ -39,9 +39,9 @@ func Test_EventCommiteValidate(t *testing.T) {
 
 		"validate event public id": {
 			Status: "success",
-			Payload: EventCommite{
-				UserPublicId:  uuid.NewString(),
-				EventPublicId: uuid.NewString(),
+			Payload: EventCommittee{
+				UserPublicId:  uuid.New(),
+				EventPublicId: uuid.New(),
 				Position:      EventPosition_Admin,
 			},
 			Err: nil,
@@ -49,8 +49,8 @@ func Test_EventCommiteValidate(t *testing.T) {
 
 		"event_public_id is required": {
 			Status: "fail",
-			Payload: EventCommite{
-				UserPublicId: uuid.NewString(),
+			Payload: EventCommittee{
+				UserPublicId: uuid.New(),
 				Position:     EventPosition_Admin,
 			},
 			Err: response.ErrEventPublicIdRequired,

@@ -42,7 +42,7 @@ func init() {
 	repo := newRepository(db)
 	svc = newService(repo)
 
-  fmt.Println(tempdata.TempLastUserPublicId)
+	fmt.Println(tempdata.TempLastUserPublicId.String())
 }
 
 func Test_SendOtp(t *testing.T) {
@@ -66,26 +66,25 @@ func Test_SendOtp(t *testing.T) {
 				Email: tempEmail,
 			}
 
-      t.Run("success, send otp to email", func (t *testing.T) {
-        err := authService.SendOtp(context.Background(), req)
-        require.Nil(t, err)
-      })
+			t.Run("success, send otp to email", func(t *testing.T) {
+				err := authService.SendOtp(context.Background(), req)
+				require.Nil(t, err)
+			})
 
-		   // Then Delete all the otp
-      t.Run("success, delete otp", func(t *testing.T) {
-			  err := authService.Repo.DeleteOtpByEmail(context.Background(), tempEmail)
-        require.Nil(t, err)
-      })
+			// Then Delete all the otp
+			t.Run("success, delete otp", func(t *testing.T) {
+				err := authService.Repo.DeleteOtpByEmail(context.Background(), tempEmail)
+				require.Nil(t, err)
+			})
 
-		  t.Run("success, delete user auth", func(t *testing.T) {
-			  // Delete temp account in the database first
-			  err := authService.DeleteAuth(context.Background(), req.Email)
-			  require.Nil(t, err)
+			t.Run("success, delete user auth", func(t *testing.T) {
+				// Delete temp account in the database first
+				err := authService.DeleteAuth(context.Background(), req.Email)
+				require.Nil(t, err)
 
-			  err = authService.SendOtp(context.Background(), req)
-			  require.Nil(t, err)
-      })
-
+				err = authService.SendOtp(context.Background(), req)
+				require.Nil(t, err)
+			})
 
 			t.Run("success verify otp", func(t *testing.T) {
 				req := auth.VerifyOtpRequestPayload{
@@ -102,7 +101,7 @@ func Test_SendOtp(t *testing.T) {
 					Name:                 "Member Muhamad Ilham",
 					Password:             tempPassword,
 					PasswordConfirmation: tempPassword,
-					PublicIdUserOtp:      uuid.MustParse(tempdata.TempPublicIdUserOtp),
+					PublicIdUserOtp:      tempdata.TempPublicIdUserOtp,
 				}
 
 				err := authService.Register(context.Background(), req)
@@ -127,192 +126,191 @@ func Test_VerifyOtp(t *testing.T) {
 
 func Test_AddNewMember(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-    req := AddCommunityMemberRequestPayload{
+		req := AddCommunityMemberRequestPayload{
 			Role:         CommunityMemberRole_member,
-			UserPublicId: tempdata.TempLastUserPublicId,
-      CommunityId: 65,
+			UserPublicId: tempdata.TempLastUserPublicId.String(),
+			CommunityId:  65,
 		}
 
-    err := svc.AddMember(context.Background(), req)
-    require.Nil(t, err)
+		err := svc.AddMember(context.Background(), req)
+		require.Nil(t, err)
 	})
 
 	t.Run("fail, user not found", func(t *testing.T) {
-    req := AddCommunityMemberRequestPayload{
+		req := AddCommunityMemberRequestPayload{
 			Role:         CommunityMemberRole_member,
 			UserPublicId: uuid.NewString(),
-      CommunityId: 65,
+			CommunityId:  65,
 		}
 
-    err := svc.AddMember(context.Background(), req)
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrNotFound, err)
+		err := svc.AddMember(context.Background(), req)
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrNotFound, err)
 	})
 }
 
 func Test_GetAllMemberByCommunityId(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-    pagination := CommunityMemberListRequestPayload{}
-    members, err := svc.GetAllMemberByCommunityId(context.Background(), 65 , pagination.GenerateDefaultValue())
-    require.Nil(t, err)
-    require.NotNil(t, members)
+		pagination := CommunityMemberListRequestPayload{}
+		members, err := svc.GetAllMemberByCommunityId(context.Background(), 65, pagination.GenerateDefaultValue())
+		require.Nil(t, err)
+		require.NotNil(t, members)
 	})
 }
 
 func Test_UpdateMember(t *testing.T) {
-  type Mock struct {
-    Status string
-    Payload UpdateCommunityMemberRequestPayload
-    Err error
-  }
+	type Mock struct {
+		Status  string
+		Payload UpdateCommunityMemberRequestPayload
+		Err     error
+	}
 
-  // Get detail user 
-  member, err := svc.repo.GetDetailMember(context.Background(), tempdata.TempLastUserPublicId, 65)
-  if err != nil {
-    panic(err)
-  }
+	// Get detail user
+	member, err := svc.repo.GetDetailMember(context.Background(), tempdata.TempLastUserPublicId.String(), 65)
+	if err != nil {
+		panic(err)
+	}
 
-  var data = map[string]Mock{
-    "update community member" : {
-      Status: "success",
-      Payload: UpdateCommunityMemberRequestPayload {
-        CommunityId: 65,
-        UserPublicId: member.UserPublicId,
-        Nik: member.Nik,
-        Role : member.Role,
-        IsActive: member.IsActive,
-        PhotoKTP: member.PhotoKTP,
-      },
-      Err : nil,
-    },
+	var data = map[string]Mock{
+		"update community member": {
+			Status: "success",
+			Payload: UpdateCommunityMemberRequestPayload{
+				CommunityId:  65,
+				UserPublicId: member.UserPublicId,
+				Nik:          member.Nik,
+				Role:         member.Role,
+				IsActive:     member.IsActive,
+				PhotoKTP:     member.PhotoKTP,
+			},
+			Err: nil,
+		},
 
-    "member not found" : {
-      Status: "fail",
-      Payload: UpdateCommunityMemberRequestPayload {
-        CommunityId: 65,
-        UserPublicId: uuid.NewString(),
-        Nik: member.Nik,
-        Role : member.Role,
-        IsActive: member.IsActive,
-        PhotoKTP: member.PhotoKTP,
-      },
-      Err : response.ErrNotFound,
-    },
+		"member not found": {
+			Status: "fail",
+			Payload: UpdateCommunityMemberRequestPayload{
+				CommunityId:  65,
+				UserPublicId: uuid.NewString(),
+				Nik:          member.Nik,
+				Role:         member.Role,
+				IsActive:     member.IsActive,
+				PhotoKTP:     member.PhotoKTP,
+			},
+			Err: response.ErrNotFound,
+		},
 
-    "community not found" : {
-      Status: "fail",
-      Payload: UpdateCommunityMemberRequestPayload {
-        CommunityId: 9999,
-        UserPublicId: uuid.NewString(),
-        Nik: member.Nik,
-        Role : member.Role,
-        IsActive: member.IsActive,
-        PhotoKTP: member.PhotoKTP,
-      },
-      Err : response.ErrNotFound,
-    },
-  }
+		"community not found": {
+			Status: "fail",
+			Payload: UpdateCommunityMemberRequestPayload{
+				CommunityId:  9999,
+				UserPublicId: uuid.NewString(),
+				Nik:          member.Nik,
+				Role:         member.Role,
+				IsActive:     member.IsActive,
+				PhotoKTP:     member.PhotoKTP,
+			},
+			Err: response.ErrNotFound,
+		},
+	}
 
-  for i, m := range data {
-    t.Run(fmt.Sprintf("%s, %s", m.Status, i), func (t *testing.T) {
-      err := svc.Update(context.Background(), m.Payload);
-      
-      if m.Err != nil {
-        require.NotNil(t, err)
-        require.Equal(t, m.Err , err)
-      }else {
-        require.Nil(t, err)
-      }
-    })
-  }
+	for i, m := range data {
+		t.Run(fmt.Sprintf("%s, %s", m.Status, i), func(t *testing.T) {
+			err := svc.Update(context.Background(), m.Payload)
+
+			if m.Err != nil {
+				require.NotNil(t, err)
+				require.Equal(t, m.Err, err)
+			} else {
+				require.Nil(t, err)
+			}
+		})
+	}
 }
 
 func Test_KickMember(t *testing.T) {
 
-  type Req struct {
-    EditorId string 
-    MemberId string 
-    CommunityId int
-  }
+	type Req struct {
+		EditorId    string
+		MemberId    string
+		CommunityId int
+	}
 
-  type Mock struct {
-    Status string
-    Payload Req
-    Err error
-  }
+	type Mock struct {
+		Status  string
+		Payload Req
+		Err     error
+	}
 
-  // Get detail user 
-  editor, err := svc.repo.GetDetailMember(context.Background(), "4631d7f4-ebe6-4065-9d42-a6b89aa639ad", 65)
-  if err != nil {
-    panic(err)
-  }
+	// Get detail user
+	editor, err := svc.repo.GetDetailMember(context.Background(), "4631d7f4-ebe6-4065-9d42-a6b89aa639ad", 65)
+	if err != nil {
+		panic(err)
+	}
 
-  var data = map[string]Mock{
-    "kick community member" : {
-      Status: "success",
-      Payload: Req {
-        CommunityId: 65,
-        MemberId : tempdata.TempLastUserPublicId,
-        EditorId : editor.UserPublicId,
-      },
-      Err : nil,
-    },
+	var data = map[string]Mock{
+		"kick community member": {
+			Status: "success",
+			Payload: Req{
+				CommunityId: 65,
+				MemberId:    tempdata.TempLastUserPublicId.String(),
+				EditorId:    editor.UserPublicId,
+			},
+			Err: nil,
+		},
 
-    "not permitted" : {
-      Status: "fail",
-      Payload: Req {
-        CommunityId: 65,
-        MemberId : uuid.NewString(),
-        EditorId : tempdata.TempLastUserPublicId,
-      },
-      Err : response.ErrCommunityMemberRoleNotPermitted,
-    },
+		"not permitted": {
+			Status: "fail",
+			Payload: Req{
+				CommunityId: 65,
+				MemberId:    uuid.NewString(),
+				EditorId:    tempdata.TempLastUserPublicId.String(),
+			},
+			Err: response.ErrCommunityMemberRoleNotPermitted,
+		},
 
-    "member not found" : {
-      Status: "fail",
-      Payload: Req {
-        CommunityId: 65,
-        MemberId : uuid.NewString(),
-        EditorId : editor.UserPublicId,
-      },
-      Err : response.ErrNotFound,
-    },
+		"member not found": {
+			Status: "fail",
+			Payload: Req{
+				CommunityId: 65,
+				MemberId:    uuid.NewString(),
+				EditorId:    editor.UserPublicId,
+			},
+			Err: response.ErrNotFound,
+		},
 
-    "community not found" : {
-      Status: "fail",
-      Payload: Req {
-        CommunityId: 999,
-        MemberId : tempdata.TempLastUserPublicId,
-        EditorId : editor.UserPublicId,
-      },
-      Err : response.ErrNotFound,
-    },
-  }
+		"community not found": {
+			Status: "fail",
+			Payload: Req{
+				CommunityId: 999,
+				MemberId:    tempdata.TempLastUserPublicId.String(),
+				EditorId:    editor.UserPublicId,
+			},
+			Err: response.ErrNotFound,
+		},
+	}
 
-  for i, m := range data {
-    t.Run(fmt.Sprintf("%s, %s", m.Status, i), func (t *testing.T) {
-      err := svc.KickMember(context.Background(), m.Payload.EditorId, m.Payload.MemberId, m.Payload.CommunityId);
-      
-      if m.Err != nil {
-        require.NotNil(t, err)
-        require.Equal(t, m.Err , err)
-      }else {
-        require.Nil(t, err)
-      }
-    })
-  }
+	for i, m := range data {
+		t.Run(fmt.Sprintf("%s, %s", m.Status, i), func(t *testing.T) {
+			err := svc.KickMember(context.Background(), m.Payload.EditorId, m.Payload.MemberId, m.Payload.CommunityId)
+
+			if m.Err != nil {
+				require.NotNil(t, err)
+				require.Equal(t, m.Err, err)
+			} else {
+				require.Nil(t, err)
+			}
+		})
+	}
 }
 
 func Test_DeleteMember(t *testing.T) {
-  t.Run("success, delete member", func (t *testing.T) {
-    err := svc.DeleteCommunityMember(context.Background(), tempdata.TempLastUserPublicId, 65)
-    require.Nil(t, err)
-  })
+	t.Run("success, delete member", func(t *testing.T) {
+		err := svc.DeleteCommunityMember(context.Background(), tempdata.TempLastUserPublicId.String(), 65)
+		require.Nil(t, err)
+	})
 
-  t.Run("fail, member not found", func(t *testing.T) {
-    err := svc.DeleteCommunityMember(context.Background(), tempdata.TempLastUserPublicId, 65)
-    require.NotNil(t, err)
-    require.Equal(t, response.ErrNotFound, err)
-  })
+	t.Run("fail, member not found", func(t *testing.T) {
+		err := svc.DeleteCommunityMember(context.Background(), tempdata.TempLastUserPublicId.String(), 65)
+		require.NotNil(t, err)
+		require.Equal(t, response.ErrNotFound, err)
+	})
 }
-

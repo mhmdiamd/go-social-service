@@ -20,7 +20,6 @@ func NewRepository(db *sqlx.DB) repository {
 }
 
 func (r repository) CreateAuth(ctx context.Context, model AuthEntity) (err error) {
-
 	query := `
     INSERT INTO auth (
       public_id, name, email, password, user_otp_public_id, created_at, updated_at
@@ -42,7 +41,6 @@ func (r repository) CreateAuth(ctx context.Context, model AuthEntity) (err error
 }
 
 func (r repository) GetAuthByEmail(ctx context.Context, email string) (model AuthEntity, err error) {
-
 	query := `
     SELECT 
       id, public_id, email, password, name, gender, no_tlp, address
@@ -62,7 +60,6 @@ func (r repository) GetAuthByEmail(ctx context.Context, email string) (model Aut
 }
 
 func (r repository) CreateOTP(ctx context.Context, model OtpEntity) (err error) {
-
 	query := `
     INSERT INTO user_otp (
      public_id, otp, email, is_active, expired_at, updated_at, created_at
@@ -77,7 +74,6 @@ func (r repository) CreateOTP(ctx context.Context, model OtpEntity) (err error) 
 	}
 
 	_, err = stmt.ExecContext(ctx, model)
-
 	if err != nil {
 		return
 	}
@@ -88,7 +84,6 @@ func (r repository) CreateOTP(ctx context.Context, model OtpEntity) (err error) 
 }
 
 func (r repository) GetOtpByEmail(ctx context.Context, email string) (models []OtpEntity, err error) {
-
 	query := `
     SELECT 
       id, public_id, otp, email, is_active, expired_at, created_at, updated_at
@@ -96,7 +91,6 @@ func (r repository) GetOtpByEmail(ctx context.Context, email string) (models []O
   `
 
 	err = r.db.SelectContext(ctx, &models, query, email)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = response.ErrNotFound
@@ -108,7 +102,6 @@ func (r repository) GetOtpByEmail(ctx context.Context, email string) (models []O
 }
 
 func (r repository) GetDetailOtp(ctx context.Context, public_id_user_otp uuid.UUID) (model OtpEntity, err error) {
-
 	query := `
     SELECT 
       id, public_id, otp, email, is_active, expired_at, created_at, updated_at
@@ -117,7 +110,6 @@ func (r repository) GetDetailOtp(ctx context.Context, public_id_user_otp uuid.UU
   `
 
 	err = r.db.GetContext(ctx, &model, query, public_id_user_otp)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = response.ErrNotFound
@@ -131,7 +123,6 @@ func (r repository) GetDetailOtp(ctx context.Context, public_id_user_otp uuid.UU
 }
 
 func (r repository) GetDetailOtpByEmailAndOtp(ctx context.Context, req VerifyOtpRequestPayload) (model OtpEntity, err error) {
-
 	query := `
     SELECT 
       id, public_id, otp, email, is_active, expired_at, created_at, updated_at
@@ -140,7 +131,6 @@ func (r repository) GetDetailOtpByEmailAndOtp(ctx context.Context, req VerifyOtp
   `
 
 	err = r.db.GetContext(ctx, &model, query, req.Otp, req.Email)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = response.ErrNotFound
@@ -154,13 +144,11 @@ func (r repository) GetDetailOtpByEmailAndOtp(ctx context.Context, req VerifyOtp
 }
 
 func (r repository) DeleteAuthByEmail(ctx context.Context, email string) (err error) {
-
 	query := `
     DELETE FROM auth WHERE email=$1
   `
 
 	_, err = r.db.ExecContext(ctx, query, email)
-
 	if err != nil {
 		return
 	}
@@ -169,13 +157,11 @@ func (r repository) DeleteAuthByEmail(ctx context.Context, email string) (err er
 }
 
 func (r repository) DeleteOtpByEmail(ctx context.Context, email string) (err error) {
-
 	query := `
     DELETE FROM user_otp WHERE email=$1
   `
 
 	_, err = r.db.ExecContext(ctx, query, email)
-
 	if err != nil {
 		return
 	}
@@ -184,17 +170,14 @@ func (r repository) DeleteOtpByEmail(ctx context.Context, email string) (err err
 }
 
 func (r repository) UnactiveOtp(ctx context.Context, email string) (err error) {
-
 	query := `
     UPDATE user_otp SET is_active=0 WHERE email=$1
   `
 
 	_, err = r.db.ExecContext(ctx, query, email)
-
 	if err != nil {
 		return
 	}
 
 	return
-
 }

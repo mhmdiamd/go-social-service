@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
+	infrafiber "github.com/mhmdiamd/go-social-service/infra/fiber"
 )
 
 func Init(router fiber.Router, db *sqlx.DB) {
@@ -14,8 +15,8 @@ func Init(router fiber.Router, db *sqlx.DB) {
 	{
 		eventRoute.Get("", handler.GetAll)
 		eventRoute.Get("/:id", handler.GetById)
-		eventRoute.Post("", handler.Create)
-		eventRoute.Put("/:id", handler.UpdateById)
-		eventRoute.Delete("/:id", handler.DeleteById)
+		eventRoute.Post("", infrafiber.CheckAuth(), handler.Create)
+		eventRoute.Put("/:id", infrafiber.CheckAuth(), handler.UpdateById)
+		eventRoute.Delete("/:id", infrafiber.CheckAuth(), handler.DeleteById)
 	}
 }

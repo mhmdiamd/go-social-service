@@ -168,9 +168,9 @@ func (r repository) GetEventDemographicsById(ctx context.Context, eventDemograph
 	return
 }
 
-func (r repository) CreateEventCommite(ctx context.Context, tx *sqlx.Tx, ec EventCommite) (err error) {
+func (r repository) CreateEventCommittee(ctx context.Context, tx *sqlx.Tx, ec EventCommittee) (err error) {
 	query := `
-    INSERT INTO event_commite (
+    INSERT INTO event_committee (
       user_public_id, event_public_id, position, created_at, updated_at
     ) VALUES (
       :user_public_id, :event_public_id, :position, :created_at, :updated_at

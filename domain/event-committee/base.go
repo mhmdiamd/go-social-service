@@ -1,4 +1,4 @@
-package eventcommite
+package eventcommittee
 
 import (
 	"context"
@@ -19,14 +19,12 @@ func Init(router fiber.Router, db *sqlx.DB) {
 		}
 	}()
 
-	eventRoute := router.Group("event")
-
-	eventcommiteRoute := eventRoute.Group("event-committee")
+	EventCommitteeRoute := router.Group("event/event-committee")
 	{
-		eventcommiteRoute.Get("", handler.GetAll)
-		eventcommiteRoute.Get("/:id", handler.GetById)
-		eventcommiteRoute.Post("", handler.Create)
-		eventcommiteRoute.Put("/:id", handler.UpdateById)
-		eventcommiteRoute.Delete("/:id", handler.DeleteById)
+		EventCommitteeRoute.Get("", handler.GetAll)
+		EventCommitteeRoute.Get("/:id", handler.GetById)
+		EventCommitteeRoute.Post("", handler.Create)
+		EventCommitteeRoute.Put("/:id", handler.UpdateById)
+		EventCommitteeRoute.Delete("/:id", handler.DeleteById)
 	}
 }

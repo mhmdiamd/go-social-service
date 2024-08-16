@@ -2,34 +2,36 @@ package event
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
-type CreateEventCommiteRequestPayload struct {
-	UserPublicId  string
-	EventPublicId string
+type CreateEventCommitteeRequestPayload struct {
+	UserPublicId  uuid.UUID
+	EventPublicId uuid.UUID
 	Position      Position
 }
 
 type CreateEventRequestPayload struct {
 	Name                string    `json:"name"`
-	UserPublicId        string    `json:"user_public_id"`
+	UserPublicId        uuid.UUID `json:"user_public_id"`
 	EventDemographicsId int       `json:"event_demographic_id"`
-	Description         *string    `json:"description"`
-	Address             *string    `json:"address"`
+	Description         *string   `json:"description"`
+	Address             *string   `json:"address"`
 	Thumbnail           string    `json:"thumbnail"`
-	StartDate           time.Time `json:"start_date"`
-	EndDate             time.Time `json:"end_date"`
+	StartDate           time.Time `json:"start_at"`
+	EndDate             time.Time `json:"end_at"`
 }
 
 type UpdateEventRequestPayload struct {
-	PublicId    string    `json:"event_public_id"`
-  EventDemographicsId int       `json:"event_demographic_id"`
-	Name        string    `json:"name"`
-	Description *string    `json:"description"`
-	Address     *string    `json:"address"`
-	Thumbnail   string    `json:"thumbnail"`
-	StartDate   time.Time `json:"start_date"`
-	EndDate     time.Time `json:"end_date"`
+	PublicId            uuid.UUID `json:"event_public_id"`
+	EventDemographicsId int       `json:"event_demographic_id"`
+	Name                string    `json:"name"`
+	Description         *string   `json:"description"`
+	Address             *string   `json:"address"`
+	Thumbnail           string    `json:"thumbnail"`
+	StartDate           time.Time `json:"start_at"`
+	EndDate             time.Time `json:"start_at"`
 }
 
 type ListEventRequestPayload struct {

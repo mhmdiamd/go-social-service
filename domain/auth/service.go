@@ -69,7 +69,7 @@ func (s Service) Register(ctx context.Context, req RegisterRequestPayload) (err 
 	// Add email to entity
 	authEntity.Email = userOtp.Email
 	// Add last public id to Tempdata
-	tempdata.TempLastUserPublicId = authEntity.PublicId.String()
+	tempdata.TempLastUserPublicId = authEntity.PublicId
 
 	// Execute Serivce
 	return s.Repo.CreateAuth(ctx, authEntity)
@@ -188,7 +188,7 @@ func (s Service) VerifyOtp(ctx context.Context, req VerifyOtpRequestPayload) (ot
 	otp_id = model.PublicId.String()
 
 	// set otp id for unitesting
-	tempdata.TempPublicIdUserOtp = otp_id
+	tempdata.TempPublicIdUserOtp = uuid.MustParse(otp_id)
 
 	return
 }

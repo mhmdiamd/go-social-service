@@ -1,4 +1,4 @@
-package eventcommite
+package eventcommittee
 
 import "github.com/google/uuid"
 

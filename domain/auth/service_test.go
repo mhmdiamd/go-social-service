@@ -43,7 +43,7 @@ func Test_SendOtp(t *testing.T) {
 
 			err := svc.SendOtp(context.Background(), req)
 			require.NotNil(t, err)
-			require.Equal(t, response.ErrToMuchSendEmail, err)  
+			require.Equal(t, response.ErrToMuchSendEmail, err)
 		})
 	} else {
 
@@ -52,21 +52,20 @@ func Test_SendOtp(t *testing.T) {
 				Email: tempEmail,
 			}
 
-      // Then Delete all the otp
-      t.Run("success, delete otp", func(t *testing.T) {
-			  err := svc.Repo.DeleteOtpByEmail(context.Background(), tempEmail)
-        require.Nil(t, err)
-      })
+			// Then Delete all the otp
+			t.Run("success, delete otp", func(t *testing.T) {
+				err := svc.Repo.DeleteOtpByEmail(context.Background(), tempEmail)
+				require.Nil(t, err)
+			})
 
-		  t.Run("success, delete user auth", func(t *testing.T) {
-			  // Delete temp account in the database first
-			  err := svc.DeleteAuth(context.Background(), req.Email)
-			  require.Nil(t, err)
+			t.Run("success, delete user auth", func(t *testing.T) {
+				// Delete temp account in the database first
+				err := svc.DeleteAuth(context.Background(), req.Email)
+				require.Nil(t, err)
 
-			  err = svc.SendOtp(context.Background(), req)
-			  require.Nil(t, err)
-      })
-
+				err = svc.SendOtp(context.Background(), req)
+				require.Nil(t, err)
+			})
 
 			t.Run("success verify otp", func(t *testing.T) {
 				req := VerifyOtpRequestPayload{
@@ -83,7 +82,7 @@ func Test_SendOtp(t *testing.T) {
 					Name:                 "Muhamad Ilham",
 					Password:             tempPassword,
 					PasswordConfirmation: tempPassword,
-					PublicIdUserOtp:      uuid.MustParse(tempdata.TempPublicIdUserOtp),
+					PublicIdUserOtp:      tempdata.TempPublicIdUserOtp,
 				}
 
 				err := svc.Register(context.Background(), req)

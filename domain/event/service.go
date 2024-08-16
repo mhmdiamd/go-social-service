@@ -2,8 +2,11 @@ package event
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	kafkatopic "github.com/mhmdiamd/go-social-service/internal/lib/kafka-topic"
 	"github.com/mhmdiamd/go-social-service/internal/log"
 	tempdata "github.com/mhmdiamd/go-social-service/temp_data"
 )
@@ -11,7 +14,7 @@ import (
 type Repository interface {
 	EventRepository
 	EventDemographicsRepository
-	EventCommiteRepository
+	EventCommitteeRepository
 	EventTransactionRepository
 }
 
@@ -34,17 +37,19 @@ type EventDemographicsRepository interface {
 	GetEventDemographicsById(ctx context.Context, eventDemographicsId int) (ed EventDemographics, err error)
 }
 
-type EventCommiteRepository interface {
-	CreateEventCommite(ctx context.Context, tx *sqlx.Tx, ec EventCommite) (err error)
+type EventCommitteeRepository interface {
+	CreateEventCommittee(ctx context.Context, tx *sqlx.Tx, ec EventCommittee) (err error)
 }
 
 type service struct {
-	repo Repository
+	repo         Repository
+	kafkaPublish EventPublisherEvent
 }
 
 func newService(r Repository) service {
 	return service{
-		repo: r,
+		repo:         r,
+		kafkaPublish: NewKafkaEventPublisherEvent(),
 	}
 }
 
@@ -60,8 +65,8 @@ func (s *service) GetAllWithPagination(ctx context.Context, req ListEventRequest
 	return ConvertToEventResponseList(entities), nil
 }
 
-func (s *service) GetDetailById(ctx context.Context, event_public_id string) (event Event, err error) {
-	event, err = s.repo.GetDetailById(ctx, event_public_id)
+func (s *service) GetDetailById(ctx context.Context, event_public_id uuid.UUID) (event Event, err error) {
+	event, err = s.repo.GetDetailById(ctx, event_public_id.String())
 	if err != nil {
 		log.Log.Errorf(ctx, "[GetDetailById, GetDetailById] with error detail %s", err.Error())
 		return
@@ -72,6 +77,8 @@ func (s *service) GetDetailById(ctx context.Context, event_public_id string) (ev
 
 func (s *service) Create(ctx context.Context, req CreateEventRequestPayload) (err error) {
 	event := NewEventFromCreate(req)
+
+	fmt.Println(event)
 
 	if err = event.Validate(); err != nil {
 		return
@@ -99,17 +106,22 @@ func (s *service) Create(ctx context.Context, req CreateEventRequestPayload) (er
 		return
 	}
 
-	commite := CreateEventCommiteRequestPayload{
+	commite := CreateEventCommitteeRequestPayload{
 		UserPublicId:  req.UserPublicId,
 		EventPublicId: event.PublicId,
-		Position:      EventPosition_Admin,
+		Position:      EventCommitteePosition_Director,
 	}
 
-	newCommite := NewEventCommiteFromCreate(commite)
+	newCommite := NewEventCommitteeFromCreate(commite)
 	tempdata.TempCurrentEventPublicId = event.PublicId
 	// Create Event Commite admin
-	if err = s.repo.CreateEventCommite(ctx, tx, newCommite); err != nil {
-		log.Log.Errorf(ctx, "[Create, CreateEventCommite] with error detail %s", err.Error())
+	// if err = s.repo.CreateEventCommittee(ctx, tx, newCommite); err != nil {
+	// 	log.Log.Errorf(ctx, "[Create, CreateEventCommittee] with error detail %s", err.Error())
+	// 	return
+	// }
+	//
+
+	if err = s.kafkaPublish.PublishCreateEvent(ctx, newCommite, kafkatopic.CREATE_EVENT_COMMITTEE); err != nil {
 		return
 	}
 
@@ -137,7 +149,7 @@ func (s *service) UpdateById(ctx context.Context, req UpdateEventRequestPayload)
 	}
 
 	// make sure that event is exist
-	_, err = s.repo.GetDetailById(ctx, newEvent.PublicId)
+	_, err = s.repo.GetDetailById(ctx, newEvent.PublicId.String())
 	if err != nil {
 		log.Log.Errorf(ctx, "[Update, GetDetailById] with error detail %s", err.Error())
 		return
@@ -168,16 +180,16 @@ func (s *service) UpdateById(ctx context.Context, req UpdateEventRequestPayload)
 	return
 }
 
-func (s *service) DeleteById(ctx context.Context, eventPublicId string) (err error) {
+func (s *service) DeleteById(ctx context.Context, eventPublicId uuid.UUID) (err error) {
 	// Check is the event exist
-	_, err = s.repo.GetDetailById(ctx, eventPublicId)
+	_, err = s.repo.GetDetailById(ctx, eventPublicId.String())
 	if err != nil {
 		log.Log.Errorf(ctx, "[DeleteById, GetDetailById] with error detail %s", err.Error())
 		return
 	}
 
 	// Delete the Event
-	if err = s.repo.DeleteById(ctx, eventPublicId); err != nil {
+	if err = s.repo.DeleteById(ctx, eventPublicId.String()); err != nil {
 		log.Log.Errorf(ctx, "[DeleteById, DeleteById] with error detail %s", err.Error())
 		return
 	}

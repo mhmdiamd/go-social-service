@@ -76,6 +76,7 @@ func CheckIsAdmin() fiber.Handler {
 }
 
 func CheckAuth() fiber.Handler {
+	// fmt.Println("tes")
 	return func(c *fiber.Ctx) error {
 		authorization := c.Get("authorization")
 

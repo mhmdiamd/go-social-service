@@ -3,6 +3,7 @@ package event
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/mhmdiamd/go-social-service/domain/auth"
 	"github.com/mhmdiamd/go-social-service/infra/response"
 )
@@ -10,22 +11,23 @@ import (
 type Position string
 
 const (
-	EventPosition_Admin  Position = "admin"
-	EventPosition_Staff  Position = "staff"
-	EventPosition_Member Position = "member"
+	EventCommitteePosition_Director Position = "director"
+	EventPosition_Admin             Position = "admin"
+	EventPosition_Staff             Position = "staff"
+	EventPosition_Member            Position = "member"
 )
 
-type EventCommite struct {
+type EventCommittee struct {
 	Id            int       `db:"-"`
-	UserPublicId  string    `db:"user_public_id"`
-	EventPublicId string    `db:"event_public_id"`
+	UserPublicId  uuid.UUID `db:"user_public_id"`
+	EventPublicId uuid.UUID `db:"event_public_id"`
 	Position      Position  `db:"position"`
 	CreatedAt     time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt     time.Time `db:"updated_at" json:"updated_at"`
 }
 
-func NewEventCommiteFromCreate(req CreateEventCommiteRequestPayload) EventCommite {
-	ec := EventCommite{
+func NewEventCommitteeFromCreate(req CreateEventCommitteeRequestPayload) EventCommittee {
+	ec := EventCommittee{
 		UserPublicId:  req.UserPublicId,
 		EventPublicId: req.EventPublicId,
 		Position:      EventPosition_Member,
@@ -40,8 +42,7 @@ func NewEventCommiteFromCreate(req CreateEventCommiteRequestPayload) EventCommit
 	return ec
 }
 
-func (ec *EventCommite) Validate() (err error) {
-
+func (ec *EventCommittee) Validate() (err error) {
 	if err = ec.ValidateUserPublicId(); err != nil {
 		return
 	}
@@ -53,29 +54,28 @@ func (ec *EventCommite) Validate() (err error) {
 	return
 }
 
-func (ec *EventCommite) ValidateUserPublicId() (err error) {
-
-	if ec.UserPublicId == "" {
+func (ec *EventCommittee) ValidateUserPublicId() (err error) {
+	if ec.UserPublicId.String() == "" {
 		return response.ErrUserPublicIdRequired
 	}
 
 	return
 }
 
-func (ec *EventCommite) ValidateEventPublicId() (err error) {
-	if ec.EventPublicId == "" {
+func (ec *EventCommittee) ValidateEventPublicId() (err error) {
+	if ec.EventPublicId.String() == "" {
 		return response.ErrEventPublicIdRequired
 	}
 
 	return
 }
 
-func (ec *EventCommite) IsMember() bool {
+func (ec *EventCommittee) IsMember() bool {
 	return ec.Position == EventPosition_Member
 }
 
-func (e *EventCommite) NewEventCommiteRepsonse(user auth.AuthEntity) EventCommiteResponse {
-	return EventCommiteResponse{
+func (e *EventCommittee) NewEventCommitteeRepsonse(user auth.AuthEntity) EventCommitteeResponse {
+	return EventCommitteeResponse{
 		Id:            e.Id,
 		UserPublicId:  e.UserPublicId,
 		EventPublicId: e.EventPublicId,
@@ -85,5 +85,4 @@ func (e *EventCommite) NewEventCommiteRepsonse(user auth.AuthEntity) EventCommit
 			Email: user.Email,
 		},
 	}
-
 }

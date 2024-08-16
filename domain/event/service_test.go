@@ -43,13 +43,11 @@ func Test_CreateEvent(t *testing.T) {
 		Err     error
 	}
 
-	currentId = uuid.NewString()
-
 	dataMock := map[string]mock{
 		"create new event": {
 			Status: "success",
 			Payload: CreateEventRequestPayload{
-				UserPublicId:        currentId,
+				UserPublicId:        uuid.New(),
 				EventDemographicsId: 19,
 				Name:                "Tes event 1",
 				Thumbnail:           "default.jpg",
@@ -62,7 +60,7 @@ func Test_CreateEvent(t *testing.T) {
 		"name id is required": {
 			Status: "fail",
 			Payload: CreateEventRequestPayload{
-				UserPublicId:        uuid.NewString(),
+				UserPublicId:        uuid.New(),
 				EventDemographicsId: 19,
 				Thumbnail:           "default.jpg",
 				StartDate:           time.Now(),
@@ -123,7 +121,7 @@ func Test_UpdateEventById(t *testing.T) {
 		"name id is required": {
 			Status: "fail",
 			Payload: UpdateEventRequestPayload{
-				PublicId:  currentId,
+				PublicId:  uuid.New(),
 				Thumbnail: "default.jpg",
 				StartDate: time.Now(),
 				EndDate:   time.Now(),
@@ -167,7 +165,7 @@ func Test_GetDetailEventById(t *testing.T) {
 	})
 
 	t.Run("fail, event not found", func(t *testing.T) {
-		_, err := svc.GetDetailById(context.Background(), uuid.NewString())
+		_, err := svc.GetDetailById(context.Background(), uuid.New())
 		require.NotNil(t, err)
 		require.Equal(t, response.ErrNotFound, err)
 	})

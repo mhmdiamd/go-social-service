@@ -12,7 +12,8 @@ import (
 	categoryComunity "github.com/mhmdiamd/go-social-service/domain/category-community"
 	"github.com/mhmdiamd/go-social-service/domain/community"
 	communityMember "github.com/mhmdiamd/go-social-service/domain/community_member"
-	eventcommite "github.com/mhmdiamd/go-social-service/domain/event-commite"
+	"github.com/mhmdiamd/go-social-service/domain/event"
+	eventcommittee "github.com/mhmdiamd/go-social-service/domain/event-committee"
 	eventDemographics "github.com/mhmdiamd/go-social-service/domain/event-demographics"
 	"github.com/mhmdiamd/go-social-service/external/database"
 	"github.com/mhmdiamd/go-social-service/internal/config"
@@ -97,7 +98,8 @@ func main() {
 	auth.Init(router, db)
 	categoryComunity.Init(router, db)
 	eventDemographics.Init(router, db)
-	eventcommite.Init(router, db)
+	event.Init(router, db)
+	eventcommittee.Init(router, db)
 	community.Init(router, db)
 	communityMember.Init(router, db)
 
