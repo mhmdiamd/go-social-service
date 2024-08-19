@@ -21,9 +21,9 @@ func newRepository(db *sqlx.DB) repository {
 func (r repository) Create(ctx context.Context, entity EventCommitteeEntity) (err error) {
 	query := `
     INSERT INTO event_committee(
-      name, gender, start_age, end_age, graduation, created_at, updated_at
+       user_public_id, event_public_id, position, created_at, updated_at
     ) VALUES (
-      :name, :gender, :start_age, :end_age, :graduation, :created_at, :updated_at
+      :user_public_id, :event_public_id, :position, :created_at, :updated_at
     )
   `
 

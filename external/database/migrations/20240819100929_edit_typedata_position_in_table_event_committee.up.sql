@@ -1,0 +1,1 @@
+ALTER TABLE event_committee ALTER COLUMN position SET DATA TYPE VARCHAR(255);

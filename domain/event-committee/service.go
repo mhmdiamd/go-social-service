@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/mhmdiamd/go-social-service/infra/response"
+	"github.com/mhmdiamd/go-social-service/internal/log"
 )
 
 type Repository interface {
@@ -30,12 +31,14 @@ func (s service) AddEventCommittee(ctx context.Context, req CreateEventCommittee
 
 	// Entity Validation
 	if err = ec.Validate(); err != nil {
+		log.Log.Errorf(ctx, "[Create, Validate] with error detail %s", err.Error())
 		return
 	}
 
 	// hit service to create event demographics entity
 	err = s.repo.Create(ctx, ec)
 	if err != nil {
+		log.Log.Errorf(ctx, "[Create, AddEventCommittee] with error detail %s", err.Error())
 		return
 	}
 
@@ -45,6 +48,7 @@ func (s service) AddEventCommittee(ctx context.Context, req CreateEventCommittee
 func (s service) UpdateById(ctx context.Context, req UpdateEventCommitteeRequestPayload) (err error) {
 	ec := NewEventCommitteeEntityFromUpdate(req)
 	if err = ec.Validate(); err != nil {
+		log.Log.Errorf(ctx, "[Create, Validate] with error detail %s", err.Error())
 		return
 	}
 
@@ -55,12 +59,14 @@ func (s service) UpdateById(ctx context.Context, req UpdateEventCommitteeRequest
 	// Check is event demographis alredy Exists firs
 	_, err = s.repo.GetById(ctx, ec.Id)
 	if err != nil {
+		log.Log.Errorf(ctx, "[Create, GetById] with error detail %s", err.Error())
 		return
 	}
 
 	// hit service to create event demographics entity
 	err = s.repo.UpdateById(ctx, ec)
 	if err != nil {
+		log.Log.Errorf(ctx, "[Create, UpdateById] with error detail %s", err.Error())
 		return
 	}
 
@@ -70,11 +76,13 @@ func (s service) UpdateById(ctx context.Context, req UpdateEventCommitteeRequest
 func (s service) DeleteById(ctx context.Context, id int) (err error) {
 	_, err = s.repo.GetById(ctx, id)
 	if err != nil {
+		log.Log.Errorf(ctx, "[DeleteById, GetById] with error detail %s", err.Error())
 		return
 	}
 
 	err = s.repo.DeleteById(ctx, id)
 	if err != nil {
+		log.Log.Errorf(ctx, "[DeleteById, DeleteById] with error detail %s", err.Error())
 		return
 	}
 

@@ -14,14 +14,14 @@ const (
 	EventCommitteePosition_Director Position = "director"
 	EventPosition_Admin             Position = "admin"
 	EventPosition_Staff             Position = "staff"
-	EventPosition_Member            Position = "member"
+	EventCommitteePosition_Member   Position = "member"
 )
 
 type EventCommittee struct {
-	Id            int       `db:"-"`
-	UserPublicId  uuid.UUID `db:"user_public_id"`
-	EventPublicId uuid.UUID `db:"event_public_id"`
-	Position      Position  `db:"position"`
+	Id            int       `db:"-" json:"id"`
+	UserPublicId  uuid.UUID `db:"user_public_id" json:"user_public_id"`
+	EventPublicId uuid.UUID `db:"event_public_id" json:"event_public_id"`
+	Position      Position  `db:"position" json:"position"`
 	CreatedAt     time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt     time.Time `db:"updated_at" json:"updated_at"`
 }
@@ -30,7 +30,7 @@ func NewEventCommitteeFromCreate(req CreateEventCommitteeRequestPayload) EventCo
 	ec := EventCommittee{
 		UserPublicId:  req.UserPublicId,
 		EventPublicId: req.EventPublicId,
-		Position:      EventPosition_Member,
+		Position:      EventCommitteePosition_Member,
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
 	}
@@ -71,7 +71,7 @@ func (ec *EventCommittee) ValidateEventPublicId() (err error) {
 }
 
 func (ec *EventCommittee) IsMember() bool {
-	return ec.Position == EventPosition_Member
+	return ec.Position == EventCommitteePosition_Member
 }
 
 func (e *EventCommittee) NewEventCommitteeRepsonse(user auth.AuthEntity) EventCommitteeResponse {

@@ -78,8 +78,6 @@ func (s *service) GetDetailById(ctx context.Context, event_public_id uuid.UUID) 
 func (s *service) Create(ctx context.Context, req CreateEventRequestPayload) (err error) {
 	event := NewEventFromCreate(req)
 
-	fmt.Println(event)
-
 	if err = event.Validate(); err != nil {
 		return
 	}
@@ -121,6 +119,7 @@ func (s *service) Create(ctx context.Context, req CreateEventRequestPayload) (er
 	// }
 	//
 
+	fmt.Println(newCommite)
 	if err = s.kafkaPublish.PublishCreateEvent(ctx, newCommite, kafkatopic.CREATE_EVENT_COMMITTEE); err != nil {
 		return
 	}

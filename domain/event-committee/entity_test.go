@@ -9,9 +9,7 @@ import (
 )
 
 func Test_EventDemographicsValidate_Success(t *testing.T) {
-	payload := CreateEventCommitteeRequestPayload{
-		Name: "Cakupan Anak SMK",
-	}
+	payload := CreateEventCommitteeRequestPayload{}
 
 	entity := NewEventCommitteeEntity(payload)
 

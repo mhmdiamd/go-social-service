@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -57,7 +58,9 @@ func init() {
 
 func main() {
 	filename := "./cmd/api/config-local.yaml"
-
+	if os.Getenv("APP_ENV") == "local" {
+		filename = "./cmd/api/config-local.yaml"
+	}
 	if os.Getenv("APP_ENV") == "staging" {
 		filename = "./cmd/api/config-staging.yaml"
 	}
@@ -103,5 +106,10 @@ func main() {
 	community.Init(router, db)
 	communityMember.Init(router, db)
 
-	router.Listen(config.Cfg.App.Port)
+	if os.Getenv("APP_ENV") == "local" {
+		server := fmt.Sprintf("%s%s", "localhost", config.Cfg.App.Port)
+		router.Listen(server)
+	} else {
+		router.Listen(config.Cfg.App.Port)
+	}
 }
